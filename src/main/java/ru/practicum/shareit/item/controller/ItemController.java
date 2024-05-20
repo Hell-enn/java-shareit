@@ -21,7 +21,8 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemServiceImpl;
-    
+
+
     /**
      * Эндпоинт. Контроллер получает HTTP-запрос на добавление
      * объекта типа Item и направляет его в текущий эндпоинт.

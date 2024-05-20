@@ -65,7 +65,7 @@ public class BookingServiceImpl implements BookingService {
      * В случае неудачи выбрасывает исключение ValidationException
      * с сообщением об ошибке.
      *
-     * @param bookingDto
+     * @param bookingDto ()
      */
     private void validateBooking(BookingDto bookingDto) {
 
