@@ -1,7 +1,6 @@
 package ru.practicum.shareit.request.service;
 
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
 
@@ -12,10 +11,10 @@ public interface ItemRequestService {
      * с сообщением об ошибке.
      * В случае успеха возвращает добавленный объект.
      *
-     * @param itemRequest
+     * @param itemRequestDto ()
      * @return
      */
-    ItemRequestDto postItemRequest(ItemRequest itemRequest);
+    ItemRequestDto postItemRequest(Long userId, ItemRequestDto itemRequestDto);
 
 
     /**
@@ -24,10 +23,10 @@ public interface ItemRequestService {
      * с сообщением об ошибке.
      * В случае успеха возвращает обновлённый объект.
      *
-     * @param itemRequest
+     * @param itemRequestDto ()
      * @return
      */
-    ItemRequestDto patchItemRequest(ItemRequest itemRequest);
+    ItemRequestDto patchItemRequest(Long userId, ItemRequestDto itemRequestDto, Long requestId);
 
 
     /**

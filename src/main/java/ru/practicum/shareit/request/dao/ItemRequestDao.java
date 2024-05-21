@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request.dao;
 
+import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
@@ -9,14 +10,14 @@ public interface ItemRequestDao {
      * Добавляет объект itemRequest в список.
      * @param itemRequest
      */
-    ItemRequest addItemRequest(ItemRequest itemRequest);
+    ItemRequest addItemRequest(Long userId, ItemRequestDto itemRequest);
 
 
     /**
      * Обновляет объект itemRequest в списке.
      * @param itemRequest
      */
-    ItemRequest updateItemRequest(ItemRequest itemRequest);
+    ItemRequest updateItemRequest(Long userId, ItemRequestDto itemRequest, Long requestId);
 
 
     /**

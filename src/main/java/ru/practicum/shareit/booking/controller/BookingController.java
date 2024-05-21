@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -11,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
+@Slf4j
 public class BookingController {
 
     private final BookingService bookingServiceImpl;
@@ -33,6 +35,7 @@ public class BookingController {
     @PostMapping
     public BookingDto postBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
                                @Valid @RequestBody BookingDto bookingDto) {
+        log.debug("Принят запрос на добавление бронирования от пользователя с id={}", userId);
         return bookingServiceImpl.postBooking(userId, bookingDto);
     }
 
@@ -52,6 +55,7 @@ public class BookingController {
     public BookingDto patchBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
                              @Valid @RequestBody BookingDto booking,
                              @PathVariable Long bookingId) {
+        log.debug("Принят запрос на обновление бронирования с id = {}", bookingId);
         return bookingServiceImpl.patchBooking(userId, booking, bookingId);
     }
 
@@ -64,6 +68,7 @@ public class BookingController {
      */
     @GetMapping
     public List<BookingDto> getBookings(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        log.debug("Принят запрос на получение списка всех бронирований");
         return bookingServiceImpl.getBookings(userId);
     }
 
@@ -75,6 +80,7 @@ public class BookingController {
      */
     @DeleteMapping("/{id}")
     public void deleteBooking(@PathVariable(name = "id") long bookingId) {
+        log.debug("Принят запрос на удаление бронирования с id={}", bookingId);
         bookingServiceImpl.deleteBooking(bookingId);
     }
 
@@ -87,6 +93,7 @@ public class BookingController {
      */
     @GetMapping("/{id}")
     public BookingDto getBooking(@PathVariable long id) {
+        log.debug("Принят запрос на получение бронирования с id={}", id);
         return bookingServiceImpl.getBooking(id);
     }
 }

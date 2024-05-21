@@ -19,15 +19,15 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestDao inMemoryItemRequestDao;
 
 
-    public ItemRequestDto postItemRequest(ItemRequest itemRequest) {
+    public ItemRequestDto postItemRequest(Long userId, ItemRequestDto itemRequestDto) {
 
-        validateItemRequest(itemRequest);
-        return ItemRequestMapper.toItemRequestDto(inMemoryItemRequestDao.addItemRequest(itemRequest));
+        validateItemRequest(itemRequestDto);
+        return ItemRequestMapper.toItemRequestDto(inMemoryItemRequestDao.addItemRequest(userId, itemRequestDto));
     }
 
 
-    public ItemRequestDto patchItemRequest(ItemRequest itemRequest) {
-        return ItemRequestMapper.toItemRequestDto(inMemoryItemRequestDao.updateItemRequest(itemRequest));
+    public ItemRequestDto patchItemRequest(Long userId, ItemRequestDto itemRequestDto, Long requestId) {
+        return ItemRequestMapper.toItemRequestDto(inMemoryItemRequestDao.updateItemRequest(userId, itemRequestDto, requestId));
     }
 
 
@@ -68,17 +68,17 @@ public class ItemRequestServiceImpl implements ItemRequestService {
      * В случае неудачи выбрасывает исключение ValidationException
      * с сообщением об ошибке.
      *
-     * @param itemRequest
+     * @param itemRequestDto ()
      */
-    private void validateItemRequest(ItemRequest itemRequest) {
+    private void validateItemRequest(ItemRequestDto itemRequestDto) {
 
         String message = "";
 
-        if (itemRequest == null)
+        if (itemRequestDto == null)
             message = "Вы не передали информацию о запросе!";
-        else if (itemRequest.getRequestor() == null)
+        else if (itemRequestDto.getRequestor() == null)
             message = "Имя пользователя отсутствует!";
-        else if (itemRequest.getCreated() == null)
+        else if (itemRequestDto.getCreated() == null)
             message = "Вы не передали информацию о времени создания запроса!";
 
         if (!message.isBlank()) {

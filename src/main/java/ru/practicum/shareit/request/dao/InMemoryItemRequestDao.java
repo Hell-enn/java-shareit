@@ -1,11 +1,15 @@
 package ru.practicum.shareit.request.dao;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.AlreadyExistsException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,14 +18,12 @@ import java.util.Map;
 
 @Component
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class InMemoryItemRequestDao implements ItemRequestDao {
 
     private final Map<Long, ItemRequest> itemRequests = new HashMap<>();
-    private int id;
-
-    public InMemoryItemRequestDao() {
-    }
+    private long id;
+    private UserDao inMemoryUserDao;
 
     /**
      * Метод генерирует и возвращает идентификатор запроса на вещь.
@@ -33,13 +35,15 @@ public class InMemoryItemRequestDao implements ItemRequestDao {
 
 
     @Override
-    public ItemRequest addItemRequest(ItemRequest itemRequest) {
+    public ItemRequest addItemRequest(Long userId, ItemRequestDto itemRequestDto) {
 
-        if (itemRequests.get(itemRequest.getId()) != null)
+        if (itemRequests.get(itemRequestDto.getId()) != null)
             throw new AlreadyExistsException("Данный запрос уже зарегистрирован!");
 
-        itemRequest.setId(getId());
-        itemRequests.put(itemRequest.getId(), itemRequest);
+        Long requestId = getId();
+        ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto, requestId, inMemoryUserDao.getUser(userId));
+
+        itemRequests.put(requestId, itemRequest);
 
         log.debug("Запрос \"{}\" добавлен!", itemRequest.getDescription());
         return itemRequest;
@@ -47,13 +51,15 @@ public class InMemoryItemRequestDao implements ItemRequestDao {
 
 
     @Override
-    public ItemRequest updateItemRequest(ItemRequest itemRequest) {
+    public ItemRequest updateItemRequest(Long userId, ItemRequestDto itemRequestDto, Long requestId) {
 
-        if (itemRequests.get(itemRequest.getId()) == null)
-            throw new NotFoundException("Запрос с id=" + itemRequest.getId() + " не найден!");
+        if (itemRequests.get(requestId) == null)
+            throw new NotFoundException("Запрос с id=" + requestId + " не найден!");
 
-        log.debug("Запрос \"{}\" обновлён!", itemRequest.getDescription());
-        itemRequests.put(itemRequest.getId(), itemRequest);
+        User user = inMemoryUserDao.getUser(userId);
+        ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto, requestId, user);
+        itemRequests.put(requestId, itemRequest);
+        log.debug("Запрос \"{}\" обновлён!", itemRequestDto.getDescription());
         return itemRequest;
     }
 

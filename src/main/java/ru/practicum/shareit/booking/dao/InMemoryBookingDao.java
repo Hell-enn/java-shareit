@@ -1,9 +1,10 @@
 package ru.practicum.shareit.booking.dao;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -17,16 +18,13 @@ import java.util.Map;
 
 @Component
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class InMemoryBookingDao implements BookingDao {
 
     private final Map<Long, Booking> bookings = new HashMap<>();
     private int id;
     private UserDao inMemoryUserDao;
     private ItemDao inMemoryItemDao;
-
-    public InMemoryBookingDao() {
-    }
 
     /**
      * Метод генерирует и возвращает идентификатор бронирования.
@@ -40,14 +38,8 @@ public class InMemoryBookingDao implements BookingDao {
     @Override
     public Booking addBooking(Long userId, BookingDto bookingDto) {
 
-        Booking newBooking = new Booking(
-                getId(),
-                bookingDto.getStart(),
-                bookingDto.getEnd(),
-                inMemoryItemDao.getItem(bookingDto.getItem()),
-                inMemoryUserDao.getUser(userId),
-                bookingDto.getStatus()
-        );
+        Booking newBooking = BookingMapper.toBooking(
+                bookingDto, getId(), inMemoryItemDao.getItem(bookingDto.getItem()), inMemoryUserDao.getUser(userId));
 
         bookings.put(newBooking.getId(), newBooking);
 
@@ -79,7 +71,7 @@ public class InMemoryBookingDao implements BookingDao {
                 booking.getEnd(),
                 addedBooking.getItem(),
                 addedBooking.getBooker(),
-                booking.getStatus()
+                booking.getBookingStatus()
         );
 
         bookings.put(newBooking.getId(), newBooking);

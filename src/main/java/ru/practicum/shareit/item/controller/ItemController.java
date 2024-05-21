@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
+@Slf4j
 public class ItemController {
 
     private final ItemService itemServiceImpl;
@@ -40,6 +42,7 @@ public class ItemController {
     @PostMapping
     public ItemDto postItem(@RequestHeader("X-Sharer-User-Id") Long userId,
                             @Valid @RequestBody ItemDto itemDto) {
+        log.debug("Принят запрос на добавление вещи {} от пользователя с id = {}", itemDto.getName(), userId);
         return itemServiceImpl.postItem(userId, itemDto);
     }
 
@@ -63,6 +66,7 @@ public class ItemController {
     public ItemDto patchItem(@RequestHeader("X-Sharer-User-Id") Long userId,
                              @Valid @RequestBody ItemDto itemDto,
                              @PathVariable Long itemId) {
+        log.debug("Принят запрос на обновление вещи с id={} от пользователя с id = {}", itemId, userId);
         return itemServiceImpl.patchItem(userId, itemDto, itemId);
     }
 
@@ -81,6 +85,7 @@ public class ItemController {
      */
     @GetMapping
     public List<ItemDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        log.debug("Принят запрос на получение списка всех вещей пользователя с id={}", userId);
         return itemServiceImpl.getItems(userId);
     }
 
@@ -98,6 +103,7 @@ public class ItemController {
      */
     @DeleteMapping("/{id}")
     public void deleteItem(@PathVariable(name = "id") Long itemId) {
+        log.debug("Принят запрос на удаление вещи с id={}", itemId);
         itemServiceImpl.deleteItem(itemId);
     }
 
@@ -117,6 +123,7 @@ public class ItemController {
      */
     @GetMapping("/{id}")
     public ItemDto getItem(@PathVariable(name = "id") Long itemId) {
+        log.debug("Принят запрос на получение вещи с id={}", itemId);
         return itemServiceImpl.getItem(itemId);
     }
 
@@ -136,6 +143,7 @@ public class ItemController {
      */
     @GetMapping("/search")
     public List<ItemDto> getItemsBySearch(@RequestParam String text) {
+        log.debug("Принят запрос на получение списка вещей, удовлетворяющих запросу '{}'", text);
         return itemServiceImpl.getItemsBySearch(text);
     }
 }
