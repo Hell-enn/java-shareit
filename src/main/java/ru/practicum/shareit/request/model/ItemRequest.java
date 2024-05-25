@@ -1,17 +1,16 @@
-package ru.practicum.shareit.request.dto;
+package ru.practicum.shareit.request.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import ru.practicum.shareit.user.model.User;
 
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class ItemRequestDto {
+public class ItemRequest {
     private long id;
-    @Size(min = 1, max = 200)
     private final String description;
-    private final Long requestor;
+    private final User requestor;
     private final LocalDateTime created;
 }
