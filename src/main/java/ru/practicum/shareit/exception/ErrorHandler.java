@@ -1,6 +1,9 @@
 package ru.practicum.shareit.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -10,7 +13,6 @@ import ru.practicum.shareit.item.controller.ItemController;
 import ru.practicum.shareit.request.controller.ItemRequestController;
 import ru.practicum.shareit.user.controller.UserController;
 
-import java.util.Map;
 
 /**
  * Класс-обработчик ErrorHandler предназначен для
@@ -23,48 +25,61 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handleAlreadyExists(final AlreadyExistsException e) {
-        return Map.of("Объект уже существует", e.getMessage());
+    public ResponseEntity<Object> handleAlreadyExists(final AlreadyExistsException e) {
+        return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleBadRequest(final BadRequestException e) {
-        return Map.of("Ошибка в запросе", e.getMessage());
+    public ResponseEntity<Object> handleBadRequest(final BadRequestException e) {
+        return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFound(final NotFoundException e) {
-        return Map.of("Объект не найден", e.getMessage());
+    public ResponseEntity<Object> handleNotFound(final NotFoundException e) {
+        return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND);
     }
 
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public Map<String, String> handleForbidden(final ForbiddenException e) {
-        return Map.of("Такая манипуляция с объектом запрещена", e.getMessage());
+    public ResponseEntity<Object> handleForbidden(final ForbiddenException e) {
+        return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.FORBIDDEN);
     }
 
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidation(final ValidationException e) {
-        return Map.of("Объект не прошел валидацию", e.getMessage());
+    public ResponseEntity<Object> handleValidation(final ValidationException e) {
+        return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String>  handleSpringValidation(MethodArgumentNotValidException e) {
-        return Map.of("Объект-аргумент не отвечает заявленным требованиям", e.getMessage());
+    public ResponseEntity<Object>  handleSpringValidation(MethodArgumentNotValidException e) {
+        return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object>  handleSqlException(DataIntegrityViolationException e) {
+        return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler
+    public ResponseEntity<Object> handleUnsupportedOperationException(UnsupportedOperationException e) {
+        return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleAnyError(final Throwable e) {
-        return Map.of("Ошибка на сервере", e.getMessage());
+    public ResponseEntity<Object> handleAnyError(final Throwable e) {
+        return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

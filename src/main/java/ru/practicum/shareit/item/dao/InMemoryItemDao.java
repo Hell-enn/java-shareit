@@ -10,9 +10,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dao.ItemRequestDao;
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.dao.UserDao;
-import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +33,7 @@ public class InMemoryItemDao implements ItemDao {
     private UserDao inMemoryUserDao;
     @Autowired
     private ItemRequestDao inMemoryItemRequestDao;
+    private ItemMapper itemMapper;
 
     public InMemoryItemDao() {
     }
@@ -51,19 +50,16 @@ public class InMemoryItemDao implements ItemDao {
 
     @Override
     public Item addItem(Long userId, ItemDto itemDto) {
-
         Long requestId = itemDto.getRequest();
-        ItemRequest itemRequest = requestId != null ? inMemoryItemRequestDao.getItemRequest(requestId) : null;
-        User user = inMemoryUserDao.getUser(userId);
-
         Long itemId = getId();
-        Item newItem = ItemMapper.toItem(itemDto, user, itemRequest, itemId);
+        itemDto.setOwner(null);
+        itemDto.setRequest(requestId);
+        Item newItem = itemMapper.toItem(itemDto, userId);
 
         items.put(itemId, newItem);
 
         log.debug("Вещь {} добавлена!", newItem.getName());
         return newItem;
-
     }
 
 

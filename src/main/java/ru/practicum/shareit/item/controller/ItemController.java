@@ -3,7 +3,9 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemGetDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -17,7 +19,7 @@ import java.util.List;
  * из хранилища ItemDao.
  */
 @RestController
-@RequestMapping("/items")
+@RequestMapping(path = "/items")
 @RequiredArgsConstructor
 @Slf4j
 public class ItemController {
@@ -81,10 +83,10 @@ public class ItemController {
      *
      * @param userId (идентификатор пользователя, список вещей которого необходимо извлечь)
      *
-     * @return List<ItemDto>
+     * @return List<ItemGetDto>
      */
     @GetMapping
-    public List<ItemDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemGetDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
         log.debug("Принят запрос на получение списка всех вещей пользователя с id={}", userId);
         return itemServiceImpl.getItems(userId);
     }
@@ -118,13 +120,15 @@ public class ItemController {
      * извлечения объекта типа Item из хранилища.
      *
      * @param itemId (объект арендуемой вещи, который необходимо удалить из хранилища)
+     * @param userId (идентификатор пользователя, запрашивающего информацию о вещи)
      *
-     * @return ItemDto
+     * @return ItemGetDto
      */
     @GetMapping("/{id}")
-    public ItemDto getItem(@PathVariable(name = "id") Long itemId) {
+    public ItemGetDto getItem(@PathVariable(name = "id") Long itemId,
+                           @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.debug("Принят запрос на получение вещи с id={}", itemId);
-        return itemServiceImpl.getItem(itemId);
+        return itemServiceImpl.getItem(itemId, userId);
     }
 
 
@@ -139,11 +143,32 @@ public class ItemController {
      *
      * @param text (подстрока, содержащая информацию о необходимой арендуемой вещи)
      *
-     * @return List<ItemDto>
+     * @return List<ItemGetDto>
      */
     @GetMapping("/search")
-    public List<ItemDto> getItemsBySearch(@RequestParam String text) {
+    public List<ItemGetDto> getItemsBySearch(@RequestParam String text,
+                                             @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.debug("Принят запрос на получение списка вещей, удовлетворяющих запросу '{}'", text);
-        return itemServiceImpl.getItemsBySearch(text);
+        return itemServiceImpl.getItemsBySearch(text, userId);
+    }
+
+
+    /**
+     * Эндпоинт. Контроллер получает HTTP-запрос на добавление
+     * объекта типа CommentDto и направляет его в текущий эндпоинт.
+     * Далее происходит маршрутизация в сервисный слой с бизнес-логикой.
+     * Параметры:
+     * @param itemId (идентификатор вещи, к которой добавляется комментарий)
+     * @param commentDto (объект комментария)
+     * @param userId (идентификатор пользователя, отправившего запрос на добавление комментария)
+     *
+     * @return CommentDto
+     */
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@PathVariable Long itemId,
+                                 @RequestBody CommentDto commentDto,
+                                 @RequestHeader("X-Sharer-User-Id") Long userId) {
+        log.debug("Принят запрос на добавление комментария к вещи с id = {}", itemId);
+        return itemServiceImpl.addComment(itemId, commentDto, userId);
     }
 }

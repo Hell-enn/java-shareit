@@ -9,8 +9,7 @@ public class ItemRequestMapper {
         return new ItemRequestDto(
                 itemRequest.getId(),
                 itemRequest.getDescription(),
-                itemRequest.getRequestor() != null ? itemRequest.getRequestor().getId() : null,
-                itemRequest.getCreated()
+                itemRequest.getRequestor() != null ? itemRequest.getRequestor().getId() : null
         );
     }
 
@@ -18,8 +17,7 @@ public class ItemRequestMapper {
         return new ItemRequest(
                 requestId,
                 itemRequestDto.getDescription(),
-                user,
-                itemRequestDto.getCreated()
+                user
         );
     }
 }

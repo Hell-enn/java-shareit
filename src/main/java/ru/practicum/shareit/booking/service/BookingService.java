@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.service;
 
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingOutcomingDto;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public interface BookingService {
      * @param bookingDto
      * @return
      */
-    BookingDto postBooking(Long userId, BookingDto bookingDto);
+    BookingOutcomingDto postBooking(Long userId, BookingDto bookingDto);
 
 
     /**
@@ -24,24 +25,26 @@ public interface BookingService {
      * с сообщением об ошибке.
      * В случае успеха возвращает обновлённый объект.
      *
-     * @param booking
-     * @return
+     * @param userId (идентификатор пользователя)
+     * @param approved (информация о подтверждении бронирования)
+     *
+     * @return BookingDto
      */
-    BookingDto patchBooking(Long userId, BookingDto booking, Long bookingId);
+    BookingOutcomingDto patchBooking(Long userId, Boolean approved, Long bookingId);
 
 
     /**
-     * Метод возвращает список бронирований из хранилища.
+     * Метод возвращает список бронирований пользователя в состоянии state из хранилища.
      *
      * @return
      */
-    List<BookingDto> getBookings(Long userId);
+    List<BookingOutcomingDto> getBookings(Long userId, String state);
 
 
     /**
      * Метод удаляет бронирование с bookingId из хранилища
      */
-    void deleteBooking(long bookingId);
+    void deleteBooking(Long bookingId);
 
 
     /**
@@ -50,5 +53,14 @@ public interface BookingService {
      * @param id
      * @return
      */
-    BookingDto getBooking(long id);
+    BookingOutcomingDto getBooking(Long id, Long userId);
+
+
+    /**
+     * Метод возвращает список бронирований вещей пользователя в состоянии state из хранилища.
+     *
+     * @return
+     */
+    List<BookingOutcomingDto> getUserStuffBookings(Long userId, String state);
+
 }

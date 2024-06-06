@@ -78,8 +78,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             message = "Вы не передали информацию о запросе!";
         else if (itemRequestDto.getRequestor() == null)
             message = "Имя пользователя отсутствует!";
-        else if (itemRequestDto.getCreated() == null)
-            message = "Вы не передали информацию о времени создания запроса!";
 
         if (!message.isBlank()) {
             throw new ValidationException(message);

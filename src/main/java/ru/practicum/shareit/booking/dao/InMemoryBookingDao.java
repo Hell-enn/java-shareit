@@ -22,6 +22,7 @@ import java.util.Map;
 public class InMemoryBookingDao implements BookingDao {
 
     private final Map<Long, Booking> bookings = new HashMap<>();
+    private final BookingMapper bookingMapper;
     private int id;
     private UserDao inMemoryUserDao;
     private ItemDao inMemoryItemDao;
@@ -38,8 +39,7 @@ public class InMemoryBookingDao implements BookingDao {
     @Override
     public Booking addBooking(Long userId, BookingDto bookingDto) {
 
-        Booking newBooking = BookingMapper.toBooking(
-                bookingDto, getId(), inMemoryItemDao.getItem(bookingDto.getItem()), inMemoryUserDao.getUser(userId));
+        Booking newBooking = bookingMapper.toBooking(bookingDto, userId);
 
         bookings.put(newBooking.getId(), newBooking);
 
@@ -62,17 +62,10 @@ public class InMemoryBookingDao implements BookingDao {
             throw new BadRequestException("Пользователь не является автором бронирования!");
 
         Long addedItemId = addedBooking.getItem().getId();
-        if (!booking.getItem().equals(addedItemId))
+        if (!booking.getItemId().equals(addedItemId))
             throw new BadRequestException("Попытка изменить вещь, в отношении которой создано бронирование!");
 
-        Booking newBooking = new Booking(
-                addedBooking.getId(),
-                booking.getStart(),
-                booking.getEnd(),
-                addedBooking.getItem(),
-                addedBooking.getBooker(),
-                booking.getBookingStatus()
-        );
+        Booking newBooking = bookingMapper.toBooking(booking, userId);
 
         bookings.put(newBooking.getId(), newBooking);
         log.debug("Бронирование \"{}\" обновлено!", newBooking.getId());
