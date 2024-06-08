@@ -31,7 +31,7 @@ public class Item {
     @Column(name = "is_available")
     private Boolean available;
     @ManyToOne
-    @JoinColumn(name = "owner_id")
+    @JoinColumn(name = "user_id")
     private User owner;
     @ManyToOne
     @JoinColumn(name = "request_id")
