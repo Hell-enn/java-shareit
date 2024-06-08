@@ -23,7 +23,7 @@ public class Comment {
     @Column(name = "text")
     private String text;
     @ManyToOne
-    @JoinColumn(name = "author_id")
+    @JoinColumn(name = "user_id")
     private User author;
     @ManyToOne
     @JoinColumn(name = "item_id")
