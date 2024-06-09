@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingOutcomingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -47,19 +48,15 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingOutcomingDto patchBooking(Long userId, Boolean approved, Long bookingId) {
-        validateUpdateBooking(bookingId, userId, approved);
-        Optional<Booking> addedBookingOpt = bookingJpaRepository.findById(bookingId);
-        Booking addedBooking = null;
-        if (addedBookingOpt.isPresent()) {
-            addedBooking = addedBookingOpt.get();
-            addedBooking.setBookingStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
-            bookingJpaRepository.save(addedBooking);
-        }
+        Booking addedBooking = validateUpdateBooking(bookingId, userId, approved);
+        addedBooking.setBookingStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
+        bookingJpaRepository.save(addedBooking);
         return bookingMapper.toBookingOutcomingDto(addedBooking);
     }
 
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingOutcomingDto> getBookings(Long userId, String state) {
         if (!userJpaRepository.existsById(userId))
             throw new NotFoundException("Пользователь не найден!");
@@ -100,6 +97,7 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingOutcomingDto> getUserStuffBookings(Long userId, String state) {
         if (!userJpaRepository.existsById(userId))
             throw new NotFoundException("Пользователь не найден!");
@@ -146,9 +144,9 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public BookingOutcomingDto getBooking(Long bookingId, Long userId) {
-        validateGetBooking(bookingId, userId);
-        Booking booking = bookingJpaRepository.findById(bookingId).get();
+        Booking booking = validateGetBooking(bookingId, userId);
         return bookingMapper.toBookingOutcomingDto(booking);
     }
 
@@ -165,7 +163,6 @@ public class BookingServiceImpl implements BookingService {
      */
     private void validateNewBooking(BookingDto bookingDto, Long userId) {
 
-        String message = "";
         if (bookingDto == null)
             throw new BadRequestException("Вы не передали информацию о бронировании!");
 
@@ -174,25 +171,25 @@ public class BookingServiceImpl implements BookingService {
 
         Long itemId = bookingDto.getItemId();
         if (itemId == null)
-            message = "Ссылка на вещь отсутствует!";
-        else if (!itemJpaRepository.existsById(bookingDto.getItemId()))
-            throw new NotFoundException("Вещь не найдена!");
-        else {
-            Boolean available = itemJpaRepository.findById(bookingDto.getItemId()).get().getAvailable();
-            if (available != null && !available)
-                message = "Вещь недоступна!";
-        }
+            throw new ValidationException("Ссылка на вещь отсутствует!");
+        Optional<Item> itemOpt = itemJpaRepository.findById(itemId);
+        Boolean available = itemOpt
+                    .orElseThrow(() -> new NotFoundException("Вещь не найдена!"))
+                    .getAvailable();
+        if (available != null && !available)
+            throw new ValidationException("Вещь недоступна!");
 
         Booking crossedBooking = bookingJpaRepository.findBookingForDate(itemId, bookingDto.getStart(), bookingDto.getEnd());
         if (crossedBooking != null)
             throw new NotFoundException("Найдено другое бронирование на эти даты!");
 
-        Item item = itemJpaRepository.findById(itemId).get();
+        Item item = itemOpt.get();
         if (item.getOwner().getId().equals(userId))
             throw new NotFoundException("Хозяин вещи не может её забронировать!");
 
         LocalDateTime start = bookingDto.getStart();
         LocalDateTime end = bookingDto.getEnd();
+        String message = "";
         if (start != null && end != null && end.isBefore(start))
             message = "Дата начала бронирования не может превышать дату окончания!";
         else if (start != null && start.isBefore(LocalDateTime.now()))
@@ -219,14 +216,16 @@ public class BookingServiceImpl implements BookingService {
      * @param userId (идентификатор пользователя, который вносит изменения в бронирование)
      * @param approved (флаг подтверждения бронирования пользователем)
      */
-    private void validateUpdateBooking(Long bookingId, Long userId, Boolean approved) {
+    private Booking validateUpdateBooking(Long bookingId, Long userId, Boolean approved) {
         if (!bookingJpaRepository.existsById(bookingId))
             throw new NotFoundException("Бронирование не найдено!");
 
         if (!userJpaRepository.existsById(userId))
             throw new NotFoundException("Пользователь не найден!");
 
-        Booking booking = bookingJpaRepository.findById(bookingId).get();
+        Booking booking = bookingJpaRepository
+                .findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден!"));
         if (booking.getBookingStatus().equals(BookingStatus.APPROVED) && approved)
             throw new BadRequestException("Бронирование уже подтверждено!");
 
@@ -239,6 +238,7 @@ public class BookingServiceImpl implements BookingService {
         Long ownerId = owner.getId();
         if (!ownerId.equals(userId))
             throw new NotFoundException("Данный пользователь не может изменять статус бронирования!");
+        return booking;
     }
 
 
@@ -252,14 +252,13 @@ public class BookingServiceImpl implements BookingService {
      * @param bookingId (идентификатор бронирования)
      * @param userId (идентификатор пользователя, который запрашивает информацию о бронировании)
      */
-    private void validateGetBooking(Long bookingId, Long userId) {
+    private Booking validateGetBooking(Long bookingId, Long userId) {
         if (!bookingJpaRepository.existsById(bookingId))
             throw new NotFoundException("Бронирование не найдено!");
 
-        if (!userJpaRepository.existsById(userId))
-            throw new NotFoundException("Пользователь не найден!");
-
-        Booking booking = bookingJpaRepository.findById(bookingId).get();
+        Booking booking = bookingJpaRepository
+                .findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден!"));
         Item item = booking.getItem();
         if (item == null)
             throw new NotFoundException("Отсутствует ссылка на вещь!");
@@ -273,5 +272,6 @@ public class BookingServiceImpl implements BookingService {
         Long bookerId = booker.getId();
         if (!ownerId.equals(userId) && !bookerId.equals(userId))
             throw new NotFoundException("Данный пользователь не может изменять статус бронирования!");
+        return booking;
     }
 }

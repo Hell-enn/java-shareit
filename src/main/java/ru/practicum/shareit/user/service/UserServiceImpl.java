@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.AlreadyExistsException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -47,11 +48,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto patchUser(Long userId, UserDto userDto) {
-        validateUpdateUser(userId, userDto);
-        Optional<User> addedUserOpt = userJpaRepository.findById(userId);
-        User addedUser = null;
-        if (addedUserOpt.isPresent())
-            addedUser = addedUserOpt.get();
+        User addedUser = validateUpdateUser(userId, userDto);
         userMapper.updateUserFromDto(userDto, addedUser);
         userJpaRepository.save(addedUser);
         log.debug("Пользователь \"{}\" обновлён!", addedUser.getName());
@@ -59,6 +56,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    @Transactional(readOnly = true)
     @Override
     public List<UserDto> getUsers() {
         List<User> users = userJpaRepository.findAll();
@@ -74,6 +72,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    @Transactional(readOnly = true)
     @Override
     public UserDto getUser(Long userId) {
        Optional<User> addedUserOpt = userJpaRepository.findById(userId);
@@ -116,17 +115,17 @@ public class UserServiceImpl implements UserService {
      * @param userId (идентификатор пользователя)
      * @param userDto (объект пользователя)
      */
-    private void validateUpdateUser(Long userId, UserDto userDto) {
+    private User validateUpdateUser(Long userId, UserDto userDto) {
         if (userDto == null)
             throw new ValidationException("Вы не передали информацию о пользователе!");
-        Optional<User> userOpt = userJpaRepository.findById(userId);
-        if (userOpt.isEmpty())
-            throw new NotFoundException("Пользователь с таким id не найден!");
-
-        for (User user: userJpaRepository.findAll()) {
-            if (user != null && user.getEmail().equals(userDto.getEmail()) && !user.getId().equals(userId)) {
+        User user = userJpaRepository
+                .findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с таким id не найден!"));
+        userJpaRepository.findAll().forEach(addedUser -> {
+            if (addedUser != null && addedUser.getEmail().equals(userDto.getEmail()) && !addedUser.getId().equals(userId)) {
                 throw new RuntimeException("Пользователь с такой почтой уже существует!");
             }
-        }
+        });
+        return user;
     }
 }

@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.repository.BookingJpaRepository;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.ForbiddenException;
@@ -49,11 +50,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto patchItem(Long userId, ItemDto itemDto, Long itemId) {
-        validateUpdateItem(userId, itemId, itemDto);
-        Optional<Item> addedItemOpt = itemJpaRepository.findById(itemId);
-        Item addedItem = null;
-        if (addedItemOpt.isPresent())
-            addedItem = addedItemOpt.get();
+        Item addedItem = validateUpdateItem(userId, itemId, itemDto);
         itemMapper.updateItemFromDto(itemDto, addedItem);
         itemJpaRepository.save(addedItem);
         log.debug("Вещь \"{}\" обновлена!", addedItem.getName());
@@ -62,6 +59,7 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemGetDto> getItems(Long userId) {
         List<Item> items = itemJpaRepository.findByUserId(userId);
         List<ItemGetDto> itemDtos = new ArrayList<>();
@@ -77,16 +75,15 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public ItemGetDto getItem(Long id, Long userId) {
-        Optional<Item> addedItemOpt = itemJpaRepository.findById(id);
-        if (addedItemOpt.isEmpty())
-            throw new NotFoundException("Вещь не найдена!");
-        Item addedItem = addedItemOpt.get();
+        Item addedItem = itemJpaRepository.findById(id).orElseThrow(() -> new NotFoundException("Вещь не найдена!"));
         return itemMapper.toItemGetDto(addedItem, userId);
     }
 
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemGetDto> getItemsBySearch(String text, Long userId) {
         if (text.isBlank())
             return new ArrayList<>();
@@ -149,7 +146,6 @@ public class ItemServiceImpl implements ItemService {
         if (!message.isBlank()) {
             throw new ValidationException(message);
         }
-
     }
 
 
@@ -162,28 +158,22 @@ public class ItemServiceImpl implements ItemService {
      *
      * @param itemDto (объект валидации)
      */
-    private void validateUpdateItem(Long userId, Long itemId, ItemDto itemDto) {
+    private Item validateUpdateItem(Long userId, Long itemId, ItemDto itemDto) {
 
         if (itemDto == null)
             throw new NotFoundException("Вы не передали информацию о вещи!");
 
-        Optional<Item> addedItemOpt = itemJpaRepository.findById(itemId);
-        Item addedItem = null;
-        if (addedItemOpt.isPresent())
-            addedItem = addedItemOpt.get();
-        Long ownerId = addedItem != null ? addedItem.getOwner().getId() : null;
+        Item addedItem = itemJpaRepository
+                .findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Вещь не найдена!"));
+        Long ownerId = addedItem.getOwner().getId();
 
         if (!userId.equals(ownerId))
             throw new ForbiddenException("Пользователь не является обладателем вещи!");
-
-        Optional<Item> itemOpt = itemJpaRepository.findById(itemId);
-        if (itemOpt.isEmpty())
-            throw new NotFoundException("Информация о вещи не доступна!");
-        Item item = itemOpt.get();
-        if (itemDto.getOwner() != null && !item.getOwner().getId().equals(itemDto.getOwner()))
+        if (itemDto.getOwner() != null && !addedItem.getOwner().getId().equals(itemDto.getOwner()))
             throw new BadRequestException("Нельзя изменить хозяина вещи!");
-        if (itemDto.getRequest() != null && !item.getRequest().getId().equals(itemDto.getRequest()))
+        if (itemDto.getRequest() != null && !addedItem.getRequest().getId().equals(itemDto.getRequest()))
             throw new BadRequestException("Нельзя изменить информацию о запросе к вещи!");
-
+        return addedItem;
     }
 }

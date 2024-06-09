@@ -1,9 +1,6 @@
 package ru.practicum.shareit.booking.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -17,8 +14,8 @@ import java.time.LocalDateTime;
 @Table(name = "bookings", schema = "public")
 @Getter
 @Setter
-@ToString
 @AllArgsConstructor
+@NoArgsConstructor
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +34,4 @@ public class Booking {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private BookingStatus bookingStatus;
-
-    public Booking() {
-    }
 }

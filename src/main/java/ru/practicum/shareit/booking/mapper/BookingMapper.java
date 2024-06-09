@@ -6,14 +6,13 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingOutcomingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemJpaRepository;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserJpaRepository;
-
-import java.util.Optional;
 
 /**
  * Утилитарный класс содержит методы по преобразованию
@@ -43,17 +42,11 @@ public class BookingMapper {
     }
 
     public Booking toBooking(BookingDto bookingDto, Long userId) {
-        Optional<User> userOpt = userJpaRepository.findById(userId);
-        User user = null;
-        if (userOpt.isPresent())
-            user = userOpt.get();
+        User user = userJpaRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден!"));
         Long itemId = bookingDto.getItemId();
         Item item = null;
-        if (itemId != null) {
-            Optional<Item> itemOpt = itemJpaRepository.findById(itemId);
-            if (itemOpt.isPresent())
-                item = itemOpt.get();
-        }
+        if (itemId != null)
+            item = itemJpaRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Вещь не найдена!"));
         BookingStatus bookingStatus = null;
         switch (bookingDto.getStatus()) {
             case "WAITING": {

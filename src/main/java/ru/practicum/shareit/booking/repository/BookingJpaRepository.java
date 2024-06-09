@@ -82,19 +82,21 @@ public interface BookingJpaRepository extends JpaRepository<Booking, Long> {
             "order by b.start desc")
     List<Booking> findRejectedStuffBookingsByOwnerId(Long ownerId);
 
-    @Query("select b from Booking as b " +
-            "join b.item as i " +
-            "join i.owner as u " +
-            "where u.id = ?1 and b.start < ?2 and i.id = ?3 and b.bookingStatus <> 'REJECTED' " +
-            "order by b.end desc")
-    List<Booking> findPreviousUserBooking(Long ownerId, LocalDateTime now, Long itemId);
+    @Query(value = "select b.* from bookings as b " +
+            "join items as i on b.item_id = i.item_id " +
+            "join users as u on i.user_id = u.user_id " +
+            "where u.user_id = ?1 and b.start_date < ?2 and i.item_id = ?3 and b.status <> 'REJECTED' " +
+            "order by b.end_date desc " +
+            "limit 1 ", nativeQuery = true)
+    Booking findPreviousUserBooking(Long ownerId, LocalDateTime now, Long itemId);
 
-    @Query("select b from Booking as b " +
-            "join b.item as i " +
-            "join i.owner as u " +
-            "where u.id = ?1 and b.start > ?2 and i.id = ?3 and b.bookingStatus <> 'REJECTED' " +
-            "order by b.start asc")
-    List<Booking> findNextUserBooking(Long ownerId, LocalDateTime now, Long itemId);
+    @Query(value = "select b.* from bookings as b " +
+            "join items as i on b.item_id = i.item_id " +
+            "join users as u on i.user_id = u.user_id " +
+            "where u.user_id = ?1 and b.start_date > ?2 and i.item_id = ?3 and b.status <> 'REJECTED' " +
+            "order by b.start_date asc " +
+            "limit 1", nativeQuery = true)
+    Booking findNextUserBooking(Long ownerId, LocalDateTime now, Long itemId);
 
     @Query("select b from Booking as b " +
             "join b.booker as u " +
@@ -104,6 +106,6 @@ public interface BookingJpaRepository extends JpaRepository<Booking, Long> {
 
     @Query("select b from Booking as b " +
             "join b.item as i " +
-            "where i.id = ?1 and ((b.start < ?2 and b.end > ?2) or (b.start < ?3 and b.end > ?3))")
+            "where i.id = ?1 and ((b.start <= ?2 and b.end >= ?2) or (b.start <= ?3 and b.end >= ?3))")
     Booking findBookingForDate(Long itemId, LocalDateTime start, LocalDateTime end);
 }

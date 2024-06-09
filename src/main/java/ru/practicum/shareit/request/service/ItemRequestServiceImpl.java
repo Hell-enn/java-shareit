@@ -2,6 +2,7 @@ package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.request.dao.ItemRequestDao;
@@ -19,6 +20,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestDao inMemoryItemRequestDao;
 
 
+    @Override
     public ItemRequestDto postItemRequest(Long userId, ItemRequestDto itemRequestDto) {
 
         validateItemRequest(itemRequestDto);
@@ -26,11 +28,14 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
 
+    @Override
     public ItemRequestDto patchItemRequest(Long userId, ItemRequestDto itemRequestDto, Long requestId) {
         return ItemRequestMapper.toItemRequestDto(inMemoryItemRequestDao.updateItemRequest(userId, itemRequestDto, requestId));
     }
 
 
+    @Override
+    @Transactional(readOnly = true)
     public List<ItemRequestDto> getItemRequests() {
 
         List<ItemRequest> itemRequests = inMemoryItemRequestDao.getItemRequests();
@@ -45,11 +50,14 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
 
+    @Override
     public void deleteItemRequest(long itemRequestId) {
         inMemoryItemRequestDao.deleteItemRequest(itemRequestId);
     }
 
 
+    @Override
+    @Transactional(readOnly = true)
     public ItemRequestDto getItemRequest(long id) {
 
         ItemRequest itemRequest = inMemoryItemRequestDao.getItemRequest(id);
