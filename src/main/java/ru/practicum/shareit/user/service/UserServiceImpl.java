@@ -1,15 +1,22 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.AlreadyExistsException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserJpaRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Класс UserService предоставляет функциональность по
@@ -19,45 +26,59 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
-    private final UserDao inMemoryUserDao;
-
+    private final UserJpaRepository userJpaRepository;
+    private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
     @Override
     public UserDto postUser(UserDto userDto) {
-        validateUser(userDto);
-        return UserMapper.toUserDto(inMemoryUserDao.addUser(userDto));
+        validateNewUser(userDto);
+        User user = userMapper.toUser(userDto);
+        User addedUser;
+        try {
+            addedUser = userJpaRepository.save(user);
+        } catch (DataIntegrityViolationException ex) {
+            throw new AlreadyExistsException("Ошибка при добавлении пользователя!");
+        }
+        return userMapper.toUserDto(addedUser);
     }
 
 
     @Override
     public UserDto patchUser(Long userId, UserDto userDto) {
-        return UserMapper.toUserDto(inMemoryUserDao.updateUser(userId, userDto));
+        User addedUser = validateUpdateUser(userId, userDto);
+        userMapper.updateUserFromDto(userDto, addedUser);
+        userJpaRepository.save(addedUser);
+        log.debug("Пользователь \"{}\" обновлён!", addedUser.getName());
+        return userMapper.toUserDto(addedUser);
     }
 
 
+    @Transactional(readOnly = true)
     @Override
     public List<UserDto> getUsers() {
-        List<User> users = inMemoryUserDao.getUsers();
-        List<UserDto> userDtoList = new ArrayList<>();
-
-        for (User user: users) {
-            userDtoList.add(UserMapper.toUserDto(user));
-        }
-        return userDtoList;
+        List<User> users = userJpaRepository.findAll();
+        List<UserDto> userDtos = new ArrayList<>();
+        users.forEach(user -> userDtos.add(userMapper.toUserDto(user)));
+        return userDtos;
     }
 
 
     @Override
     public void deleteUser(Long userId) {
-        inMemoryUserDao.deleteUser(userId);
+        userJpaRepository.deleteById(userId);
     }
 
 
+    @Transactional(readOnly = true)
     @Override
     public UserDto getUser(Long userId) {
-        return UserMapper.toUserDto(inMemoryUserDao.getUser(userId));
+       Optional<User> addedUserOpt = userJpaRepository.findById(userId);
+       if (addedUserOpt.isEmpty())
+           throw new NotFoundException("Пользователь не найден!");
+        return userMapper.toUserDto(addedUserOpt.get());
     }
 
 
@@ -66,12 +87,11 @@ public class UserServiceImpl implements UserService {
      * на соответствие ряду условий. Используется впоследствии
      * для валидации объекта типа UserDto при попытке его добавления
      * в хранилище.
-     * В случае неудачи выбрасывает исключение ValidationException
-     * с сообщением об ошибке.
+     * В случае неудачи выбрасывает исключение с сообщением об ошибке.
      *
-     * @param userDto (объект пользователя, передаваемый с помощью HTTP-запроса)
+     * @param userDto (объект пользователя)
      */
-    private void validateUser(UserDto userDto) {
+    private void validateNewUser(UserDto userDto) {
 
         String message = "";
 
@@ -79,10 +99,33 @@ public class UserServiceImpl implements UserService {
             message = "Вы не передали информацию о пользователе!";
         else if (userDto.getEmail() == null)
             message = "Вы не передали информацию об электронной почте пользователя!";
-
         if (!message.isBlank()) {
             throw new ValidationException(message);
         }
+    }
 
+
+    /**
+     * Закрытый служебный метод проверяет объект типа User
+     * на соответствие ряду условий. Используется впоследствии
+     * для валидации объекта типа UserDto при попытке обновления хранимого
+     * в репозитории объекта.
+     * В случае неудачи выбрасывает исключение с сообщением об ошибке.
+     *
+     * @param userId (идентификатор пользователя)
+     * @param userDto (объект пользователя)
+     */
+    private User validateUpdateUser(Long userId, UserDto userDto) {
+        if (userDto == null)
+            throw new ValidationException("Вы не передали информацию о пользователе!");
+        User user = userJpaRepository
+                .findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с таким id не найден!"));
+        userJpaRepository.findAll().forEach(addedUser -> {
+            if (addedUser != null && addedUser.getEmail().equals(userDto.getEmail()) && !addedUser.getId().equals(userId)) {
+                throw new RuntimeException("Пользователь с такой почтой уже существует!");
+            }
+        });
+        return user;
     }
 }
