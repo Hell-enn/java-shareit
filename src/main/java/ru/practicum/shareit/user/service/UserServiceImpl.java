@@ -16,7 +16,6 @@ import ru.practicum.shareit.user.repository.UserJpaRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Класс UserService предоставляет функциональность по
@@ -40,6 +39,7 @@ public class UserServiceImpl implements UserService {
         try {
             addedUser = userJpaRepository.save(user);
         } catch (DataIntegrityViolationException ex) {
+            log.debug("При добавлении пользователя {} возникла ошибка на стороне базы данных", userDto.getName());
             throw new AlreadyExistsException("Ошибка при добавлении пользователя!");
         }
         return userMapper.toUserDto(addedUser);
@@ -62,12 +62,14 @@ public class UserServiceImpl implements UserService {
         List<User> users = userJpaRepository.findAll();
         List<UserDto> userDtos = new ArrayList<>();
         users.forEach(user -> userDtos.add(userMapper.toUserDto(user)));
+        log.debug("Возвращаем список пользователей в количестве {}", userDtos.size());
         return userDtos;
     }
 
 
     @Override
     public void deleteUser(Long userId) {
+        log.debug("Удаляем пользователя с id={}", userId);
         userJpaRepository.deleteById(userId);
     }
 
@@ -75,10 +77,10 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     @Override
     public UserDto getUser(Long userId) {
-       Optional<User> addedUserOpt = userJpaRepository.findById(userId);
-       if (addedUserOpt.isEmpty())
-           throw new NotFoundException("Пользователь не найден!");
-        return userMapper.toUserDto(addedUserOpt.get());
+       User addedUserOpt = userJpaRepository.findById(userId).orElseThrow(
+               () -> new NotFoundException("Пользователь не найден!"));
+       log.debug("Возвращаем пользователя с id={}", userId);
+        return userMapper.toUserDto(addedUserOpt);
     }
 
 
@@ -100,6 +102,7 @@ public class UserServiceImpl implements UserService {
         else if (userDto.getEmail() == null)
             message = "Вы не передали информацию об электронной почте пользователя!";
         if (!message.isBlank()) {
+            log.debug(message);
             throw new ValidationException(message);
         }
     }
@@ -116,16 +119,12 @@ public class UserServiceImpl implements UserService {
      * @param userDto (объект пользователя)
      */
     private User validateUpdateUser(Long userId, UserDto userDto) {
-        if (userDto == null)
+        if (userDto == null) {
+            log.debug("Объект типа UserDto отсутствует(null) при запросе на добавление пользователя");
             throw new ValidationException("Вы не передали информацию о пользователе!");
-        User user = userJpaRepository
+        }
+        return userJpaRepository
                 .findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с таким id не найден!"));
-        userJpaRepository.findAll().forEach(addedUser -> {
-            if (addedUser != null && addedUser.getEmail().equals(userDto.getEmail()) && !addedUser.getId().equals(userId)) {
-                throw new RuntimeException("Пользователь с такой почтой уже существует!");
-            }
-        });
-        return user;
     }
 }

@@ -58,7 +58,7 @@ public interface ItemService {
      *
      * @return List<ItemDto>
      */
-    List<ItemGetDto> getItems(Long userId);
+    List<ItemGetDto> getItems(Long userId, Integer from, Integer size);
 
 
     /**
@@ -94,7 +94,7 @@ public interface ItemService {
      *
      * @return List<ItemDto>
      */
-    List<ItemGetDto> getItemsBySearch(String text, Long userId);
+    List<ItemGetDto> getItemsBySearch(String text, Long userId, Integer from, Integer size);
 
 
     CommentDto addComment(Long itemId, CommentDto commentDto, Long userId);

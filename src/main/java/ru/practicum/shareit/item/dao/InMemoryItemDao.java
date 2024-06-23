@@ -50,10 +50,10 @@ public class InMemoryItemDao implements ItemDao {
 
     @Override
     public Item addItem(Long userId, ItemDto itemDto) {
-        Long requestId = itemDto.getRequest();
+        Long requestId = itemDto.getRequestId();
         Long itemId = getId();
         itemDto.setOwner(null);
-        itemDto.setRequest(requestId);
+        itemDto.setRequestId(requestId);
         Item newItem = itemMapper.toItem(itemDto, userId);
 
         items.put(itemId, newItem);

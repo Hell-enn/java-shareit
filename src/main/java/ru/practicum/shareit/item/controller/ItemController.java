@@ -86,9 +86,11 @@ public class ItemController {
      * @return List<ItemGetDto>
      */
     @GetMapping
-    public List<ItemGetDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemGetDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                     @RequestParam(defaultValue = "0") String from,
+                                     @RequestParam(defaultValue = "20") String size) {
         log.debug("Принят запрос на получение списка всех вещей пользователя с id={}", userId);
-        return itemServiceImpl.getItems(userId);
+        return itemServiceImpl.getItems(userId, Integer.parseInt(from), Integer.parseInt(size));
     }
 
 
@@ -119,8 +121,8 @@ public class ItemController {
      * объекта в метод уровня сервиса, содержащего бизнес-логику
      * извлечения объекта типа Item из хранилища.
      *
-     * @param itemId (объект арендуемой вещи, который необходимо удалить из хранилища)
-     * @param userId (идентификатор пользователя, запрашивающего информацию о вещи)
+     * @param itemId (идентификатор арендуемой вещи, которую необходимо удалить из хранилища)
+     * @param userId (идентификатор пользователя, отправившего запрос на удаление вещи)
      *
      * @return ItemGetDto
      */
@@ -147,9 +149,11 @@ public class ItemController {
      */
     @GetMapping("/search")
     public List<ItemGetDto> getItemsBySearch(@RequestParam String text,
-                                             @RequestHeader("X-Sharer-User-Id") Long userId) {
+                                             @RequestHeader("X-Sharer-User-Id") Long userId,
+                                             @RequestParam(defaultValue = "0") Integer from,
+                                             @RequestParam(defaultValue = "20") Integer size) {
         log.debug("Принят запрос на получение списка вещей, удовлетворяющих запросу '{}'", text);
-        return itemServiceImpl.getItemsBySearch(text, userId);
+        return itemServiceImpl.getItemsBySearch(text, userId, from, size);
     }
 
 

@@ -38,7 +38,7 @@ public interface BookingService {
      *
      * @return
      */
-    List<BookingOutcomingDto> getBookings(Long userId, String state);
+    List<BookingOutcomingDto> getBookings(Long userId, String state, Integer from, Integer size);
 
 
     /**
@@ -61,6 +61,6 @@ public interface BookingService {
      *
      * @return
      */
-    List<BookingOutcomingDto> getUserStuffBookings(Long userId, String state);
+    List<BookingOutcomingDto> getUserStuffBookings(Long userId, String state, Integer from, Integer size);
 
 }

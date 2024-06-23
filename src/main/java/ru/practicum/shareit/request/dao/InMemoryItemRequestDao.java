@@ -5,11 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.AlreadyExistsException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestInDto;
 import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.dao.UserDao;
-import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +23,7 @@ public class InMemoryItemRequestDao implements ItemRequestDao {
     private final Map<Long, ItemRequest> itemRequests = new HashMap<>();
     private long id;
     private UserDao inMemoryUserDao;
+    private final ItemRequestMapper itemRequestMapper;
 
     /**
      * Метод генерирует и возвращает идентификатор запроса на вещь.
@@ -35,13 +35,13 @@ public class InMemoryItemRequestDao implements ItemRequestDao {
 
 
     @Override
-    public ItemRequest addItemRequest(Long userId, ItemRequestDto itemRequestDto) {
+    public ItemRequest addItemRequest(Long userId, ItemRequestInDto itemRequestDto) {
 
         if (itemRequests.get(itemRequestDto.getId()) != null)
             throw new AlreadyExistsException("Данный запрос уже зарегистрирован!");
 
         Long requestId = getId();
-        ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto, requestId, inMemoryUserDao.getUser(userId));
+        ItemRequest itemRequest = itemRequestMapper.toItemRequest(itemRequestDto, userId);
 
         itemRequests.put(requestId, itemRequest);
 
@@ -51,13 +51,12 @@ public class InMemoryItemRequestDao implements ItemRequestDao {
 
 
     @Override
-    public ItemRequest updateItemRequest(Long userId, ItemRequestDto itemRequestDto, Long requestId) {
+    public ItemRequest updateItemRequest(Long userId, ItemRequestInDto itemRequestDto, Long requestId) {
 
         if (itemRequests.get(requestId) == null)
             throw new NotFoundException("Запрос с id=" + requestId + " не найден!");
 
-        User user = inMemoryUserDao.getUser(userId);
-        ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto, requestId, user);
+        ItemRequest itemRequest = itemRequestMapper.toItemRequest(itemRequestDto, userId);
         itemRequests.put(requestId, itemRequest);
         log.debug("Запрос \"{}\" обновлён!", itemRequestDto.getDescription());
         return itemRequest;

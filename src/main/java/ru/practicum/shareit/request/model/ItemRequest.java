@@ -4,6 +4,7 @@ import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "requests", schema = "public")
@@ -14,11 +15,13 @@ import javax.persistence.*;
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "request_id")
+    @Column(name = "request_id", insertable = false, updatable = false)
     private Long id;
     @Column(name = "description")
     private String description;
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User requestor;
+    private User requester;
+    @Column(name = "created")
+    private LocalDateTime created;
 }

@@ -65,6 +65,7 @@ public class BookingController {
     public BookingOutcomingDto approveBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
                                      @RequestParam Boolean approved,
                                      @PathVariable Long bookingId) {
+        log.debug("Принят запрос на " + (approved ? "подтверждение" : "отклонение") + " бронирования пользователем с id={}", userId);
         return bookingServiceImpl.patchBooking(userId, approved, bookingId);
     }
 
@@ -105,9 +106,11 @@ public class BookingController {
      */
     @GetMapping
     public List<BookingOutcomingDto> getUserBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                        @RequestParam(defaultValue = "ALL") String state) {
+                                                     @RequestParam(defaultValue = "ALL") String state,
+                                                     @RequestParam(defaultValue = "0") Integer from,
+                                                     @RequestParam(defaultValue = "20") Integer size) {
         log.debug("Принят запрос на получение списка всех бронирований");
-        return bookingServiceImpl.getBookings(userId, state);
+        return bookingServiceImpl.getBookings(userId, state, from, size);
     }
 
 
@@ -126,9 +129,11 @@ public class BookingController {
      */
     @GetMapping("/owner")
     public List<BookingOutcomingDto> getUserStuffBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                            @RequestParam(defaultValue = "ALL") String state) {
+                                                          @RequestParam(defaultValue = "ALL") String state,
+                                                          @RequestParam(defaultValue = "0") Integer from,
+                                                          @RequestParam(defaultValue = "20") Integer size) {
         log.debug("Принят запрос на получение списка всех бронирований");
-        return bookingServiceImpl.getUserStuffBookings(userId, state);
+        return bookingServiceImpl.getUserStuffBookings(userId, state, from, size);
     }
 
 
