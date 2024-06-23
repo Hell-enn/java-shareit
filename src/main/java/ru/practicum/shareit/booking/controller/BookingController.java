@@ -135,16 +135,4 @@ public class BookingController {
         log.debug("Принят запрос на получение списка всех бронирований");
         return bookingServiceImpl.getUserStuffBookings(userId, state, from, size);
     }
-
-
-    /**
-     * Эндпоинт. Удаляет бронирование с bookingId
-     *
-     * @param bookingId
-     */
-    @DeleteMapping("/{id}")
-    public void deleteBooking(@PathVariable(name = "id") Long bookingId) {
-        log.debug("Принят запрос на удаление бронирования с id={}", bookingId);
-        bookingServiceImpl.deleteBooking(bookingId);
-    }
 }

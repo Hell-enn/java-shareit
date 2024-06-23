@@ -68,9 +68,10 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public void deleteUser(Long userId) {
+    public Long deleteUser(Long userId) {
         log.debug("Удаляем пользователя с id={}", userId);
         userJpaRepository.deleteById(userId);
+        return userId;
     }
 
 

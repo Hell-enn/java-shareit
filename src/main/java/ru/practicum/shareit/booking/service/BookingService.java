@@ -42,12 +42,6 @@ public interface BookingService {
 
 
     /**
-     * Метод удаляет бронирование с bookingId из хранилища
-     */
-    void deleteBooking(Long bookingId);
-
-
-    /**
      * Метод возвращает объект бронирования по его id из хранилища.
      *
      * @param id

@@ -88,13 +88,6 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public void deleteItem(Long itemId) {
-        log.debug("Удаляем вещь с id={}", itemId);
-        itemPagingAndSortingRepository.deleteById(itemId);
-    }
-
-
-    @Override
     @Transactional(readOnly = true)
     public ItemGetDto getItem(Long id, Long userId) {
         Item addedItem = itemPagingAndSortingRepository.findById(id).orElseThrow(() -> new NotFoundException("Вещь не найдена!"));

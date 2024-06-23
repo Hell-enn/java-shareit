@@ -62,13 +62,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
 
     @Override
-    public void deleteItemRequest(Long itemRequestId) {
-        log.debug("Удаляем запрос вещи с id={}", itemRequestId);
-        requestJpaRepository.deleteById(itemRequestId);
-    }
-
-
-    @Override
     @Transactional(readOnly = true)
     public ItemRequestOutDto getItemRequest(Long id, Long userId) {
         if (!userJpaRepository.existsById(userId)) {

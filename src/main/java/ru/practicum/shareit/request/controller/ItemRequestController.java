@@ -84,24 +84,6 @@ public class ItemRequestController {
 
 
     /**
-     * Эндпоинт. Контроллер получает HTTP-запрос на удаление
-     * объекта типа ItemRequest и направляет его в текущий эндпоинт.
-     * С помощью Spring-аннотаций метод преобразует
-     * запрос в понятный java объект типа Long.
-     * В рамках текущего метода происходит маршрутизация передаваемого
-     * объекта в метод уровня сервиса, содержащего бизнес-логику
-     * удаления объекта типа ItemRequest из хранилища.
-     *
-     * @param itemRequestId (идентификатор запроса вещи, который необходимо удалить из хранилища)
-     */
-    @DeleteMapping("/{id}")
-    public void deleteItemRequest(@PathVariable(name = "id") Long itemRequestId) {
-        log.debug("Принят запрос на удаление запроса на вещь с id={}", itemRequestId);
-        itemRequestServiceImpl.deleteItemRequest(itemRequestId);
-    }
-
-
-    /**
      * Эндпоинт. Контроллер получает HTTP-запрос на получение
      * объекта типа ItemRequest и направляет его в текущий эндпоинт.
      * С помощью Spring-аннотаций метод преобразует

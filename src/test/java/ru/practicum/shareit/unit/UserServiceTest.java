@@ -9,6 +9,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.dao.DataIntegrityViolationException;
+import ru.practicum.shareit.exception.AlreadyExistsException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -79,6 +81,22 @@ public class UserServiceTest {
 
 
     @Test
+    public void testPostUserDataIntegrityException() {
+        Mockito
+                .when(mockUserJpaRepository.save(Mockito.any(User.class)))
+                .thenThrow(new DataIntegrityViolationException(""));
+
+        UserDto userDto = new UserDto(null, "Ivan Ivanov", "email@mail.com");
+
+        final AlreadyExistsException exception = Assertions.assertThrows(
+                AlreadyExistsException.class,
+                () -> userService.postUser(userDto));
+
+        Assertions.assertEquals("Ошибка при добавлении пользователя!", exception.getMessage());
+    }
+
+
+    @Test
     public void testPatchUserOk() {
         User addedUser = new User(1L, "Ivan Ivanov", "ivanivanov1@gmail.com");
         Mockito
@@ -143,7 +161,11 @@ public class UserServiceTest {
                 .when(mockUserJpaRepository.findAll())
                 .thenReturn(users);
 
-        Assertions.assertEquals(List.of(user1, user2, user3), mockUserJpaRepository.findAll());
+        UserDto userDto1 = new UserDto(1L, "Ivan Ivanov", "ivanivanov@gmail.com");
+        UserDto userDto2 = new UserDto(2L, "Petr Petrov", "petrpetrov@gmail.com");
+        UserDto userDto3 = new UserDto(3L, "Alexey Alexeev", "alexeyalexeev@gmail.com");
+
+        Assertions.assertEquals(List.of(userDto1, userDto2, userDto3), userService.getUsers());
     }
 
 
@@ -170,5 +192,12 @@ public class UserServiceTest {
                 .thenReturn(Optional.of(user));
 
         Assertions.assertEquals(userService.getUser(1L), userDto);
+    }
+
+
+    @Test
+    public void testDeleteUserOk() {
+        Mockito.doNothing().when(mockUserJpaRepository).deleteById(Mockito.anyLong());
+        Assertions.assertEquals(userService.deleteUser(1L), 1L);
     }
 }

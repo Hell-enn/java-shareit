@@ -46,12 +46,6 @@ public interface ItemRequestService {
 
 
     /**
-     * Метод удаляет запрос с идентификатором itemRequestId из хранилища
-     */
-    void deleteItemRequest(Long itemRequestId);
-
-
-    /**
      * Метод возвращает объект запроса по его идентификатору id из хранилища.
      *
      * @param id (идентификатор запроса к вещи)

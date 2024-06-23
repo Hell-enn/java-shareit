@@ -59,7 +59,7 @@ public interface UserService {
      * @param userId (идентификатор объекта типа User, который нужно удалить
      *                из хранилища)
      */
-    void deleteUser(Long userId);
+    Long deleteUser(Long userId);
 
 
     /**

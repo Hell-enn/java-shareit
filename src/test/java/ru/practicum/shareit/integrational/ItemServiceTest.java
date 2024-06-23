@@ -44,10 +44,6 @@ public class ItemServiceTest {
         ItemDto itemDto2 = new ItemDto(null, "name2", "description2", true, 2L, null, List.of());
         ItemDto itemDto3 = new ItemDto(null, "name3", "description3", true, 3L, null, List.of());
 
-        ItemGetDto itemGetDto1 = new ItemGetDto(null, "name1", "description1", true, 1L, null, null, null, List.of());
-        ItemGetDto itemGetDto2 = new ItemGetDto(null, "name2", "description2", true, 2L, null, null, null, List.of());
-        ItemGetDto itemGetDto3 = new ItemGetDto(null, "name3", "description3", true, 3L, null, null, null, List.of());
-
         UserDto addedUser1 = userService.postUser(ownerDto1);
         UserDto addedUser2 = userService.postUser(ownerDto2);
         UserDto addedUser3 = userService.postUser(ownerDto3);
@@ -56,6 +52,10 @@ public class ItemServiceTest {
         ItemDto addedItem1 = itemService.postItem(addedUser1.getId(), itemDto1);
         ItemDto addedItem2 = itemService.postItem(addedUser2.getId(), itemDto2);
         ItemDto addedItem3 = itemService.postItem(addedUser3.getId(), itemDto3);
+
+        ItemGetDto itemGetDto1 = new ItemGetDto(null, "name1", "description1", true, 1L, null, null, null, List.of());
+        ItemGetDto itemGetDto2 = new ItemGetDto(null, "name2", "description2", true, 2L, null, null, null, List.of());
+        ItemGetDto itemGetDto3 = new ItemGetDto(null, "name3", "description3", true, 3L, null, null, null, List.of());
 
         itemGetDto1.setId(addedItem1.getId());
         itemGetDto1.setBooker(addedUser1.getId());
@@ -74,5 +74,9 @@ public class ItemServiceTest {
         assertThat(itemGetDtoList, notNullValue());
         assertThat(itemGetDtoList.size(), equalTo(List.of(itemGetDto1, itemGetDto2, itemGetDto3).size()));
         assertThat(itemGetDtoList, equalTo(List.of(itemGetDto1, itemGetDto2, itemGetDto3)));
+
+        ItemDto itemDto11 = new ItemDto(null, "name11", "description11", true, 1L, null, List.of());
+        Item item11 = new Item(null, "name1", "description1", true, null, null);
+        itemMapper.updateItemFromDto(itemDto11, item11);
     }
 }

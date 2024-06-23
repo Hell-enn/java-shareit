@@ -49,6 +49,8 @@ public class ItemServiceTest {
     @Mock
     private BookingJpaRepository mockBookingJpaRepository;
     @Mock
+    private ItemPagingAndSortingRepository mockItemJpaRepository;
+    @Mock
     private CommentMapper mockCommentMapper;
     @Mock
     private ItemMapper mockItemMapper;
@@ -161,6 +163,9 @@ public class ItemServiceTest {
         User user = new User(1L, "Ivan Ivanov", "ivanivanov@gmail.com");
         Item item = new Item(1L, "item1", "description2", true, user, null);
         ItemDto itemDto = new ItemDto(1L, "item1", "description2", true, 1L, null, List.of());
+        Mockito
+                .doNothing().when(mockItemMapper).updateItemFromDto(itemDto, item);
+
         Mockito
                 .when(mockUserJpaRepository.existsById(Mockito.anyLong()))
                 .thenReturn(true);

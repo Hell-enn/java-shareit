@@ -169,13 +169,6 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public void deleteBooking(Long bookingId) {
-        log.debug("Удаляем бронирование с id={}", bookingId);
-        bookingJpaRepository.deleteById(bookingId);
-    }
-
-
-    @Override
     @Transactional(readOnly = true)
     public BookingOutcomingDto getBooking(Long bookingId, Long userId) {
         Booking booking = validateGetBooking(bookingId, userId);
