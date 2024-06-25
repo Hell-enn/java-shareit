@@ -68,10 +68,6 @@ public class ItemServiceImpl implements ItemService {
             log.debug("Объект типа User с id={} отсутствует в базе данных!", userId);
             throw new NotFoundException("Пользователь не найден!");
         }
-        if (from < 0 || size < 0) {
-            log.debug("В качестве from или size переданы отрицательные значения!");
-            throw new BadRequestException("Данные для пагинации переданы в неверном формате!");
-        }
 
         int amountOfRequests = itemPagingAndSortingRepository.findItemsAmountByOwnerId(userId);
         int pageNum = amountOfRequests > from ? from / size : 0;
@@ -102,10 +98,6 @@ public class ItemServiceImpl implements ItemService {
         if (!userJpaRepository.existsById(userId)) {
             log.debug("Объект типа User с id={} отсутствует в базе данных!", userId);
             throw new NotFoundException("Пользователь не найден!");
-        }
-        if (from < 0 || size < 0) {
-            log.debug("В качестве from или size переданы отрицательные значения!");
-            throw new BadRequestException("Данные для пагинации переданы в неверном формате!");
         }
 
         if (text.isBlank()) {

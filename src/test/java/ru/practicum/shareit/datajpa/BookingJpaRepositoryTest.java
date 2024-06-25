@@ -1,15 +1,11 @@
 package ru.practicum.shareit.datajpa;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.junit4.SpringRunner;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingJpaRepository;
@@ -22,11 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @DataJpaTest
-@RunWith(SpringRunner.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class BookingJpaRepositoryTest {
-    @Autowired
-    private TestEntityManager em;
     @Autowired
     private BookingJpaRepository bookingJpaRepository;
     @Autowired

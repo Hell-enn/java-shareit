@@ -2,12 +2,15 @@ package ru.practicum.shareit.booking.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingOutcomingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 /**
@@ -21,6 +24,7 @@ import java.util.List;
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class BookingController {
 
     private final BookingService bookingServiceImpl;
@@ -107,8 +111,8 @@ public class BookingController {
     @GetMapping
     public List<BookingOutcomingDto> getUserBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
                                                      @RequestParam(defaultValue = "ALL") String state,
-                                                     @RequestParam(defaultValue = "0") Integer from,
-                                                     @RequestParam(defaultValue = "20") Integer size) {
+                                                     @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                                     @RequestParam(defaultValue = "20") @Positive Integer size) {
         log.debug("Принят запрос на получение списка всех бронирований");
         return bookingServiceImpl.getBookings(userId, state, from, size);
     }
@@ -130,8 +134,8 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingOutcomingDto> getUserStuffBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
                                                           @RequestParam(defaultValue = "ALL") String state,
-                                                          @RequestParam(defaultValue = "0") Integer from,
-                                                          @RequestParam(defaultValue = "20") Integer size) {
+                                                          @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                                          @RequestParam(defaultValue = "20") @Positive Integer size) {
         log.debug("Принят запрос на получение списка всех бронирований");
         return bookingServiceImpl.getUserStuffBookings(userId, state, from, size);
     }

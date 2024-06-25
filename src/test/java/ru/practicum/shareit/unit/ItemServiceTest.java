@@ -339,20 +339,6 @@ public class ItemServiceTest {
 
 
     @Test
-    public void getItemsPageNotCorrect() {
-        Mockito
-                .when(mockUserJpaRepository.existsById(Mockito.anyLong()))
-                .thenReturn(true);
-
-        final BadRequestException exception = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> itemService.getItems(1L, -1, 10));
-
-        Assertions.assertEquals("Данные для пагинации переданы в неверном формате!", exception.getMessage());
-    }
-
-
-    @Test
     public void getItemOk() {
         User user1 = new User(1L, "Ivan Ivanov", "ivanivanov@gmail.com");
         User requester1 = new User(2L, "Petr Petrov", "petrpetrov@gmail.com");
@@ -441,20 +427,6 @@ public class ItemServiceTest {
                 () -> itemService.getItemsBySearch("", 1L, 0, 10));
 
         Assertions.assertEquals("Пользователь не найден!", exception.getMessage());
-    }
-
-
-    @Test
-    public void getItemsBySearchPageNotCorrect() {
-        Mockito
-                .when(mockUserJpaRepository.existsById(Mockito.anyLong()))
-                .thenReturn(true);
-
-        final BadRequestException exception = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> itemService.getItemsBySearch("", 1L, -1, 10));
-
-        Assertions.assertEquals("Данные для пагинации переданы в неверном формате!", exception.getMessage());
     }
 
 

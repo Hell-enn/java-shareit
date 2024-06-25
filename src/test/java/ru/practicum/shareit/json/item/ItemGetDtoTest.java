@@ -9,7 +9,6 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemGetDto;
 
-import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,8 +18,6 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 public class ItemGetDtoTest {
     @Autowired
     private JacksonTester<ItemGetDto> json;
-    @Valid
-    private ItemGetDto itemGetDto;
 
     @Test
     public void testItemGetDtoSerialization() throws Exception {
@@ -33,7 +30,7 @@ public class ItemGetDtoTest {
         CommentDto comment2 = new CommentDto(2L, "text2", 6L, 1L, "Igor Igorev", now.minusDays(11));
         CommentDto comment3 = new CommentDto(3L, "text3", 7L, 1L, "Ilya Ilev", now.minusDays(12));
 
-        itemGetDto = new ItemGetDto(
+        ItemGetDto itemGetDto = new ItemGetDto(
                 1L,
                 "name",
                 "description",
@@ -54,10 +51,7 @@ public class ItemGetDtoTest {
         assertThat(result).extractingJsonPathBooleanValue("$.available").isEqualTo(true);
         assertThat(result).extractingJsonPathNumberValue("$.booker").isEqualTo(2);
         assertThat(result).extractingJsonPathNumberValue("$.request").isEqualTo(1);
-        //assertThat(result).extractingJsonPathValue("$.lastBooking").isEqualTo(lastBooking.toString());
-        //assertThat(result).extractingJsonPathValue("$.nextBooking").isEqualTo(nextBooking.toString());
-        //assertThat(result).extractingJsonPathValue("$.comments").isEqualTo(List.of(comment1, comment2, comment3));
-    }
+        }
 
 
     @Test
@@ -72,7 +66,7 @@ public class ItemGetDtoTest {
         CommentDto comment2 = new CommentDto(2L, "text2", 6L, 1L, "Igor Igorev", now.minusDays(11));
         CommentDto comment3 = new CommentDto(3L, "text3", 7L, 1L, "Ilya Ilev", now.minusDays(12));
 
-        itemGetDto = new ItemGetDto(
+        ItemGetDto itemGetDto = new ItemGetDto(
                 1L,
                 "name",
                 "description",
@@ -139,7 +133,7 @@ public class ItemGetDtoTest {
         CommentDto comment2 = new CommentDto(2L, "text2", 6L, 1L, "Igor Igorev", now.minusDays(11));
         CommentDto comment3 = new CommentDto(3L, "text3", 7L, 1L, "Ilya Ilev", now.minusDays(12));
 
-        itemGetDto = new ItemGetDto(
+        ItemGetDto itemGetDto = new ItemGetDto(
                 1L,
                 "",
                 "",

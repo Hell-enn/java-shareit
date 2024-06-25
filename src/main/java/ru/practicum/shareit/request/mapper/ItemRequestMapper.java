@@ -42,7 +42,7 @@ public class ItemRequestMapper {
 
         User user = userJpaRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден!"));
         return new ItemRequest(
-                (long) 0,
+                0L,
                 itemRequestDto.getDescription(),
                 user,
                 LocalDateTime.now()

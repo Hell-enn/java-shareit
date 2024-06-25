@@ -7,21 +7,17 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 
-import javax.validation.Valid;
-
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @JsonTest
 public class ItemResponseDtoTest {
     @Autowired
     private JacksonTester<ItemResponseDto> json;
-    @Valid
-    private ItemResponseDto itemResponseDto;
 
     @Test
     public void testItemResponseDtoSerialization() throws Exception {
 
-        itemResponseDto = new ItemResponseDto(
+        ItemResponseDto itemResponseDto = new ItemResponseDto(
                 1L,
                 "name",
                 "description",
@@ -43,7 +39,7 @@ public class ItemResponseDtoTest {
     @Test
     public void testItemRequestInDtoDeserialization() throws Exception {
 
-        itemResponseDto = new ItemResponseDto(
+        ItemResponseDto itemResponseDto = new ItemResponseDto(
                 1L,
                 "name",
                 "description",
@@ -63,7 +59,7 @@ public class ItemResponseDtoTest {
     @Test
     public void testItemRequestInDtoWithoutRequester() throws Exception {
 
-        itemResponseDto = new ItemResponseDto(
+        ItemResponseDto itemResponseDto = new ItemResponseDto(
                 1L,
                 "",
                 "",

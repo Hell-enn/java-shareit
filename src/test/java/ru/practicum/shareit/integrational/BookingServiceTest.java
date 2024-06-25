@@ -56,13 +56,13 @@ public class BookingServiceTest {
         UserDto postedBooker2 = userService.postUser(bookerDto2);
         UserDto postedBooker3 = userService.postUser(bookerDto3);
 
-        itemService.postItem(postedBooker4.getId(), itemDto1);
-        itemService.postItem(postedBooker4.getId(), itemDto2);
-        itemService.postItem(postedBooker4.getId(), itemDto3);
+        ItemDto postedItem1 = itemService.postItem(postedBooker4.getId(), itemDto1);
+        ItemDto postedItem2 = itemService.postItem(postedBooker4.getId(), itemDto2);
+        ItemDto postedItem3 = itemService.postItem(postedBooker4.getId(), itemDto3);
 
-        BookingDto bookingDto1 = new BookingDto(1L, now.plusDays(10), now.plusDays(11), 1L, postedBooker1.getId(), "WAITING");
-        BookingDto bookingDto2 = new BookingDto(2L, now.plusDays(6), now.plusDays(7), 2L, postedBooker2.getId(), "WAITING");
-        BookingDto bookingDto3 = new BookingDto(3L, now.plusDays(4), now.plusDays(5), 3L, postedBooker3.getId(), "WAITING");
+        BookingDto bookingDto1 = new BookingDto(1L, now.plusDays(10), now.plusDays(11), postedItem1.getId(), postedBooker1.getId(), "WAITING");
+        BookingDto bookingDto2 = new BookingDto(2L, now.plusDays(6), now.plusDays(7), postedItem2.getId(), postedBooker2.getId(), "WAITING");
+        BookingDto bookingDto3 = new BookingDto(3L, now.plusDays(4), now.plusDays(5), postedItem3.getId(), postedBooker3.getId(), "WAITING");
 
         BookingOutcomingDto addedBookingDto1 = bookingService.postBooking(postedBooker1.getId(), bookingDto1);
         BookingOutcomingDto addedBookingDto2 = bookingService.postBooking(postedBooker2.getId(), bookingDto2);

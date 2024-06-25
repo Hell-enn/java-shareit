@@ -7,7 +7,6 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.booking.dto.BookingDto;
 
-import javax.validation.Valid;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -16,14 +15,12 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 public class BookingDtoTest {
     @Autowired
     private JacksonTester<BookingDto> json;
-    @Valid
-    private BookingDto bookingDto;
 
     @Test
     public void testBookingDtoSerialization() throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
-        bookingDto = new BookingDto(
+        BookingDto bookingDto = new BookingDto(
                 1L,
                 now.minusDays(1),
                 now.plusHours(2),
@@ -36,8 +33,6 @@ public class BookingDtoTest {
         assertThat(json.write(bookingDto)).hasJsonPathValue("$.status", "status");
 
         assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
-        //assertThat(result).extractingJsonPathValue("$.start").isEqualTo(now.minusDays(1).toString().substring(0, now.minusDays(1).toString().length() - 2));
-        //assertThat(result).extractingJsonPathValue("$.end").isEqualTo(now.plusHours(2).toString().substring(0, now.plusHours(2).toString().length() - 2));
         assertThat(result).extractingJsonPathNumberValue("$.itemId").isEqualTo(1);
         assertThat(result).extractingJsonPathNumberValue("$.bookerId").isEqualTo(1);
         assertThat(result).extractingJsonPathStringValue("$.status").isEqualTo("APPROVED");
@@ -48,7 +43,7 @@ public class BookingDtoTest {
     public void testItemRequestInDtoDeserialization() throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
-        bookingDto = new BookingDto(
+        BookingDto bookingDto = new BookingDto(
                 1L,
                 now.minusDays(1),
                 now.plusHours(2),

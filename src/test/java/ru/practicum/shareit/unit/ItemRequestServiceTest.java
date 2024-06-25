@@ -314,21 +314,4 @@ public class ItemRequestServiceTest {
                 () -> itemRequestService.getAllItemRequests(1L, 1, 10));
         Assertions.assertEquals("Пользователь не найден!", exception.getMessage());
     }
-
-
-    @Test
-    public void getAllItemRequestsWhenPaginationMistake() {
-        Mockito
-                .when(mockUserJpaRepository.existsById(Mockito.anyLong()))
-                .thenReturn(true);
-        final BadRequestException exception1 = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> itemRequestService.getAllItemRequests(1L, -1, 10));
-        Assertions.assertEquals("Данные для пагинации переданы в неверном формате!", exception1.getMessage());
-
-        final BadRequestException exception2 = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> itemRequestService.getAllItemRequests(1L, 1, -1));
-        Assertions.assertEquals("Данные для пагинации переданы в неверном формате!", exception2.getMessage());
-    }
 }

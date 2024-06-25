@@ -7,8 +7,6 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.item.dto.CommentDto;
 
-import javax.validation.Valid;
-
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -17,14 +15,12 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 public class CommentDtoTest {
     @Autowired
     private JacksonTester<CommentDto> json;
-    @Valid
-    private CommentDto commentDto;
 
     @Test
     public void testCommentDtoSerialization() throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
-        commentDto = new CommentDto(
+        CommentDto commentDto = new CommentDto(
                 1L,
                 "text",
                 1L,
@@ -49,7 +45,7 @@ public class CommentDtoTest {
     public void testItemRequestInDtoDeserialization() throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
-        commentDto = new CommentDto(
+        CommentDto commentDto = new CommentDto(
                 1L,
                 "text",
                 1L,
@@ -72,7 +68,7 @@ public class CommentDtoTest {
     public void testItemRequestInDtoWithoutRequester() throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
-        commentDto = new CommentDto(
+        CommentDto commentDto = new CommentDto(
                 1L,
                 "",
                 null,

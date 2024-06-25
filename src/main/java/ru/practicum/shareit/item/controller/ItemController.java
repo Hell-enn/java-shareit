@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -9,6 +10,8 @@ import ru.practicum.shareit.item.dto.ItemGetDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 /**
@@ -22,6 +25,7 @@ import java.util.List;
 @RequestMapping(path = "/items")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class ItemController {
 
     private final ItemService itemServiceImpl;
@@ -87,8 +91,8 @@ public class ItemController {
      */
     @GetMapping
     public List<ItemGetDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                     @RequestParam(defaultValue = "0") String from,
-                                     @RequestParam(defaultValue = "20") String size) {
+                                     @RequestParam(defaultValue = "0") @PositiveOrZero String from,
+                                     @RequestParam(defaultValue = "20") @Positive String size) {
         log.debug("Принят запрос на получение списка всех вещей пользователя с id={}", userId);
         return itemServiceImpl.getItems(userId, Integer.parseInt(from), Integer.parseInt(size));
     }
@@ -132,8 +136,8 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemGetDto> getItemsBySearch(@RequestParam String text,
                                              @RequestHeader("X-Sharer-User-Id") Long userId,
-                                             @RequestParam(defaultValue = "0") Integer from,
-                                             @RequestParam(defaultValue = "20") Integer size) {
+                                             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                             @RequestParam(defaultValue = "20") @Positive Integer size) {
         log.debug("Принят запрос на получение списка вещей, удовлетворяющих запросу '{}'", text);
         return itemServiceImpl.getItemsBySearch(text, userId, from, size);
     }

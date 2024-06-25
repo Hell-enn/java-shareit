@@ -941,26 +941,6 @@ public class BookingServiceTest {
 
 
     @Test
-    public void testGetBookingsPaginationMistake() {
-        Mockito
-                .when(mockUserJpaRepository.existsById(Mockito.anyLong()))
-                .thenReturn(true);
-
-        final BadRequestException exception1 = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> bookingService.getBookings(1L, "UNSUPPORTED", -1, 10));
-
-        Assertions.assertEquals("Данные для пагинации переданы в неверном формате!", exception1.getMessage());
-
-        final BadRequestException exception2 = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> bookingService.getBookings(1L, "UNSUPPORTED", 1, -10));
-
-        Assertions.assertEquals("Данные для пагинации переданы в неверном формате!", exception2.getMessage());
-    }
-
-
-    @Test
     public void testGetUserStuffBookingsALLOk() {
         User owner = new User(1L, "Ivan Ivanov", "ivanivanov@gmail.com");
         User requester = new User(2L, "Petr Petrov", "petrpetrov@gmail.com");
@@ -1194,25 +1174,5 @@ public class BookingServiceTest {
                 () -> bookingService.getUserStuffBookings(1L, "UNSUPPORTED", 1, 10));
 
         Assertions.assertEquals("Пользователь не найден!", exception.getMessage());
-    }
-
-
-    @Test
-    public void testGetUserStuffBookingsPaginationMistake() {
-        Mockito
-                .when(mockUserJpaRepository.existsById(Mockito.anyLong()))
-                .thenReturn(true);
-
-        final BadRequestException exception1 = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> bookingService.getUserStuffBookings(1L, "UNSUPPORTED", -1, 10));
-
-        Assertions.assertEquals("Данные для пагинации переданы в неверном формате!", exception1.getMessage());
-
-        final BadRequestException exception2 = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> bookingService.getUserStuffBookings(1L, "UNSUPPORTED", 1, -10));
-
-        Assertions.assertEquals("Данные для пагинации переданы в неверном формате!", exception2.getMessage());
     }
 }
