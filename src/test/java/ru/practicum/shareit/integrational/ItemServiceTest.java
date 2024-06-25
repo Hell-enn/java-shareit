@@ -5,16 +5,22 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemGetDto;
+import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,6 +37,9 @@ public class ItemServiceTest {
     private final ItemService itemService;
     private final UserService userService;
     private final ItemMapper itemMapper;
+    private final CommentMapper commentMapper;
+    private final UserMapper userMapper;
+    private final BookingService bookingService;
 
     @Test
     public void testGetItemsBySearch() {
@@ -53,9 +62,12 @@ public class ItemServiceTest {
         ItemDto addedItem2 = itemService.postItem(addedUser2.getId(), itemDto2);
         ItemDto addedItem3 = itemService.postItem(addedUser3.getId(), itemDto3);
 
-        ItemGetDto itemGetDto1 = new ItemGetDto(null, "name1", "description1", true, 1L, null, null, null, List.of());
-        ItemGetDto itemGetDto2 = new ItemGetDto(null, "name2", "description2", true, 2L, null, null, null, List.of());
-        ItemGetDto itemGetDto3 = new ItemGetDto(null, "name3", "description3", true, 3L, null, null, null, List.of());
+        ItemGetDto itemGetDto1 = new ItemGetDto(
+                null, "name1", "description1", true, 1L, null, null, null, List.of());
+        ItemGetDto itemGetDto2 = new ItemGetDto(
+                null, "name2", "description2", true, 2L, null, null, null, List.of());
+        ItemGetDto itemGetDto3 = new ItemGetDto(
+                null, "name3", "description3", true, 3L, null, null, null, List.of());
 
         itemGetDto1.setId(addedItem1.getId());
         itemGetDto1.setBooker(addedUser1.getId());
@@ -78,5 +90,30 @@ public class ItemServiceTest {
         ItemDto itemDto11 = new ItemDto(null, "name11", "description11", true, 1L, null, List.of());
         Item item11 = new Item(null, "name1", "description1", true, null, null);
         itemMapper.updateItemFromDto(itemDto11, item11);
+    }
+
+
+    @Test
+    public void testAddComment() {
+        UserDto authorDto = new UserDto(null, "Petr Petrov", "petrpetrov@gmail.com");
+        UserDto ownerDto = new UserDto(null, "Alexey Alexeev", "alexeyalexeev@gmail.com");
+
+        UserDto addedAuthorDto = userService.postUser(authorDto);
+        UserDto addedOwnerDto = userService.postUser(ownerDto);
+        ItemDto itemDto = new ItemDto(
+                null, "name1", "description1", true, addedOwnerDto.getId(), null, List.of("comment1", "comment2"));
+        ItemDto addedItemDto = itemService.postItem(addedOwnerDto.getId(), itemDto);
+        CommentDto commentDto1 = new CommentDto(
+                1L, "comment1", addedAuthorDto.getId(), addedItemDto.getId(), addedAuthorDto.getName(), LocalDateTime.now());
+
+        Comment comment = commentMapper.toComment(commentDto1, addedAuthorDto.getId(), addedItemDto.getId());
+        comment.setId(commentDto1.getId());
+        CommentDto mappedCommentDto = commentMapper.toCommentDto(comment);
+
+        assertThat(mappedCommentDto, notNullValue());
+        assertThat(mappedCommentDto.getText(), equalTo(commentDto1.getText()));
+        assertThat(mappedCommentDto.getAuthor(), equalTo(commentDto1.getAuthor()));
+        assertThat(mappedCommentDto.getItem(), equalTo(commentDto1.getItem()));
+        assertThat(mappedCommentDto.getAuthorName(), equalTo(commentDto1.getAuthorName()));
     }
 }
