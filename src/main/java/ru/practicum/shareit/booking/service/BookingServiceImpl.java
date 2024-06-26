@@ -1,6 +1,9 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -14,12 +17,11 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.exception.UnsupportedOperationException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemJpaRepository;
+import ru.practicum.shareit.item.repository.ItemPagingAndSortingRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserJpaRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,17 +33,19 @@ import java.util.Optional;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BookingServiceImpl implements BookingService {
 
     private final BookingJpaRepository bookingJpaRepository;
     private final UserJpaRepository userJpaRepository;
-    private final ItemJpaRepository itemJpaRepository;
+    private final ItemPagingAndSortingRepository itemPagingAndSortingRepository;
     private final BookingMapper bookingMapper;
 
     @Override
     public BookingOutcomingDto postBooking(Long userId, BookingDto bookingDto) {
         validateNewBooking(bookingDto, userId);
         bookingDto.setStatus(BookingStatus.WAITING.getDescription());
+        log.debug("Сохранение бронирования для вещи с id={} в базу данных", bookingDto.getItemId());
         return bookingMapper.toBookingOutcomingDto(bookingJpaRepository.save(bookingMapper.toBooking(bookingDto, userId)));
     }
 
@@ -50,6 +54,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingOutcomingDto patchBooking(Long userId, Boolean approved, Long bookingId) {
         Booking addedBooking = validateUpdateBooking(bookingId, userId, approved);
         addedBooking.setBookingStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
+        log.debug("Обновление бронирования с id={} в базе данных", bookingId);
         bookingJpaRepository.save(addedBooking);
         return bookingMapper.toBookingOutcomingDto(addedBooking);
     }
@@ -57,89 +62,101 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingOutcomingDto> getBookings(Long userId, String state) {
-        if (!userJpaRepository.existsById(userId))
+    public List<BookingOutcomingDto> getBookings(Long userId, String state, Integer from, Integer size) {
+        if (!userJpaRepository.existsById(userId)) {
+            log.debug("Объект типа User с id={} отсутствует в базе данных!", userId);
             throw new NotFoundException("Пользователь не найден!");
+        }
+
+        int amountOfRequests = bookingJpaRepository.findAmountByBookerId(userId);
+        int pageNum = amountOfRequests > from ? from / size : 0;
+
+        Pageable page = PageRequest
+                .of(pageNum, size)
+                .toOptional()
+                .orElseThrow(() -> new RuntimeException("Ошибка преобразования страницы!"));
         LocalDateTime now = LocalDateTime.now();
         List<Booking> bookings;
         switch (state) {
             case "ALL": {
-                bookings = bookingJpaRepository.findByBookerIdOrderByStartDesc(userId);
+                bookings = bookingJpaRepository.findByBookerIdOrderByStartDesc(userId, page);
                 break;
             }
             case "CURRENT": {
-                bookings = bookingJpaRepository.findByBookerIdAndEndAfterAndStartBeforeOrderByStartDesc(userId, now, now);
+                bookings = bookingJpaRepository.findByBookerIdAndEndAfterAndStartBeforeOrderByStartDesc(userId, now, now, page);
                 break;
             }
             case "PAST": {
-                bookings = bookingJpaRepository.findPastBookings(userId, now);
+                bookings = bookingJpaRepository.findPastBookings(userId, now, page);
                 break;
             }
             case "FUTURE": {
-                bookings = bookingJpaRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, now);
+                bookings = bookingJpaRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, now, page);
                 break;
             }
             case "WAITING": {
-                bookings = bookingJpaRepository.findWaitingBookings(userId);
+                bookings = bookingJpaRepository.findWaitingBookings(userId, page);
                 break;
             }
             case "REJECTED": {
-                bookings = bookingJpaRepository.findRejectedBookings(userId);
+                bookings = bookingJpaRepository.findRejectedBookings(userId, page);
                 break;
             }
             default: throw new UnsupportedOperationException("{\"error\":\"Unknown state: " + state + "\"}", state);
         }
-        List<BookingOutcomingDto> bookingDtoList = new ArrayList<>();
-        bookings.forEach(booking -> bookingDtoList.add(bookingMapper.toBookingOutcomingDto(booking)));
-
-        return bookingDtoList;
+        List<BookingOutcomingDto> bookingOutcomingDtoList = bookingMapper.bookingOutcomingDtoList(bookings);
+        log.debug("Возвращаем список бронирований пользователя с id={} в количестве {}", userId, bookings.size());
+        return bookingOutcomingDtoList;
     }
 
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingOutcomingDto> getUserStuffBookings(Long userId, String state) {
-        if (!userJpaRepository.existsById(userId))
+    public List<BookingOutcomingDto> getUserStuffBookings(Long userId, String state, Integer from, Integer size) {
+        if (!userJpaRepository.existsById(userId)) {
+            log.debug("Объект типа User с id={} отсутствует в базе данных!", userId);
             throw new NotFoundException("Пользователь не найден!");
+        }
+
+        int amountOfRequests = bookingJpaRepository.findStuffBookingsAmountByOwnerId(userId);
+        int pageNum = amountOfRequests > from ? from / size : 0;
+
+        Pageable page = PageRequest
+                .of(pageNum, size)
+                .toOptional()
+                .orElseThrow(() -> new RuntimeException("Ошибка преобразования страницы!"));
         LocalDateTime now = LocalDateTime.now();
         List<Booking> bookings;
         switch (state) {
             case "ALL": {
-                bookings = bookingJpaRepository.findAllStuffBookingsByOwnerId(userId);
+                bookings = bookingJpaRepository.findAllStuffBookingsByOwnerId(userId, page);
                 break;
             }
             case "CURRENT": {
-                bookings = bookingJpaRepository.findCurrentStuffBookingsByOwnerId(userId, now);
+                bookings = bookingJpaRepository.findCurrentStuffBookingsByOwnerId(userId, now, page);
                 break;
             }
             case "PAST": {
-                bookings = bookingJpaRepository.findPastStuffBookingsByOwnerId(userId, now);
+                bookings = bookingJpaRepository.findPastStuffBookingsByOwnerId(userId, now, page);
                 break;
             }
             case "FUTURE": {
-                bookings = bookingJpaRepository.findFutureStuffBookingsByOwnerId(userId, now);
+                bookings = bookingJpaRepository.findFutureStuffBookingsByOwnerId(userId, now, page);
                 break;
             }
             case "WAITING": {
-                bookings = bookingJpaRepository.findWaitingStuffBookingsByOwnerId(userId);
+                bookings = bookingJpaRepository.findWaitingStuffBookingsByOwnerId(userId, page);
                 break;
             }
             case "REJECTED": {
-                bookings = bookingJpaRepository.findRejectedStuffBookingsByOwnerId(userId);
+                bookings = bookingJpaRepository.findRejectedStuffBookingsByOwnerId(userId, page);
                 break;
             }
             default: throw new UnsupportedOperationException("{\"error\":\"Unknown state: " + state + "\"}", state);
         }
-        List<BookingOutcomingDto> bookingDtoList = new ArrayList<>();
-        bookings.forEach(booking -> bookingDtoList.add(bookingMapper.toBookingOutcomingDto(booking)));
-
-        return bookingDtoList;
-    }
-
-
-    @Override
-    public void deleteBooking(Long bookingId) {
-        bookingJpaRepository.deleteById(bookingId);
+        List<BookingOutcomingDto> bookingOutcomingDtoList = bookingMapper.bookingOutcomingDtoList(bookings);
+        log.debug("Возвращаем список бронирований вещей пользователя с id={} в количестве {}", userId, bookings.size());
+        return bookingOutcomingDtoList;
     }
 
 
@@ -147,6 +164,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public BookingOutcomingDto getBooking(Long bookingId, Long userId) {
         Booking booking = validateGetBooking(bookingId, userId);
+        log.debug("Возвращаем бронирование с id={}", bookingId);
         return bookingMapper.toBookingOutcomingDto(booking);
     }
 
@@ -163,29 +181,41 @@ public class BookingServiceImpl implements BookingService {
      */
     private void validateNewBooking(BookingDto bookingDto, Long userId) {
 
-        if (bookingDto == null)
+        if (bookingDto == null) {
+            log.debug("Для валидации нового бронирования не передан объект типа BookingDto(null)");
             throw new BadRequestException("Вы не передали информацию о бронировании!");
+        }
 
-        if (!userJpaRepository.existsById(userId))
+        if (!userJpaRepository.existsById(userId)) {
+            log.debug("Объект типа User с id={} отсутствует в базе данных", userId);
             throw new NotFoundException("Пользователь не найден!");
+        }
 
         Long itemId = bookingDto.getItemId();
-        if (itemId == null)
+        if (itemId == null) {
+            log.debug("Не передан id объекта типа Item, для которого добавляется объект типа Booking");
             throw new ValidationException("Ссылка на вещь отсутствует!");
-        Optional<Item> itemOpt = itemJpaRepository.findById(itemId);
+        }
+        Optional<Item> itemOpt = itemPagingAndSortingRepository.findById(itemId);
         Boolean available = itemOpt
                     .orElseThrow(() -> new NotFoundException("Вещь не найдена!"))
                     .getAvailable();
-        if (available != null && !available)
+        if (available != null && !available) {
+            log.debug("Статус объекта типа Item, для которого добавляется объект Booking - 'not available'");
             throw new ValidationException("Вещь недоступна!");
+        }
 
         Booking crossedBooking = bookingJpaRepository.findBookingForDate(itemId, bookingDto.getStart(), bookingDto.getEnd());
-        if (crossedBooking != null)
+        if (crossedBooking != null) {
+            log.debug("Попытка добавления объекта типа Booking с датами, пересекающимися с уже существующими объектами");
             throw new NotFoundException("Найдено другое бронирование на эти даты!");
+        }
 
         Item item = itemOpt.get();
-        if (item.getOwner().getId().equals(userId))
+        if (item.getOwner().getId().equals(userId)) {
+            log.debug("Попытка добавления объекта типа Booking хозяином вещи");
             throw new NotFoundException("Хозяин вещи не может её забронировать!");
+        }
 
         LocalDateTime start = bookingDto.getStart();
         LocalDateTime end = bookingDto.getEnd();
@@ -195,11 +225,12 @@ public class BookingServiceImpl implements BookingService {
         else if (start != null && start.isBefore(LocalDateTime.now()))
             message = "Дата начала бронирования меньше текущего момента времени!";
         else if (start != null && start.equals(end))
-            message = "Время окончания не может быть равна времени начала!";
+            message = "Время окончания не может быть равно времени начала!";
         else if (start == null || end == null)
             message = "Время начала или окончания бронирования не задано!";
 
         if (!message.isBlank()) {
+            log.debug(message);
             throw new ValidationException(message);
         }
     }
@@ -217,27 +248,40 @@ public class BookingServiceImpl implements BookingService {
      * @param approved (флаг подтверждения бронирования пользователем)
      */
     private Booking validateUpdateBooking(Long bookingId, Long userId, Boolean approved) {
-        if (!bookingJpaRepository.existsById(bookingId))
+        if (!bookingJpaRepository.existsById(bookingId)) {
+            log.debug("Объект типа Booking с id={} отсутствует в базе данных", bookingId);
             throw new NotFoundException("Бронирование не найдено!");
+        }
 
-        if (!userJpaRepository.existsById(userId))
+        if (!userJpaRepository.existsById(userId)) {
+            log.debug("Объект типа User с id={} отсутствует в базе данных", userId);
             throw new NotFoundException("Пользователь не найден!");
+        }
 
         Booking booking = bookingJpaRepository
                 .findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден!"));
-        if (booking.getBookingStatus().equals(BookingStatus.APPROVED) && approved)
+                .orElseThrow(() -> new NotFoundException("Бронирование не найдено!"));
+        if (booking.getBookingStatus().equals(BookingStatus.APPROVED) && approved) {
+            log.debug("Попытка одобрить бронирование с id={}, которое уже было одобрено", bookingId);
             throw new BadRequestException("Бронирование уже подтверждено!");
+        }
 
         Item item = booking.getItem();
-        if (item == null)
+        if (item == null) {
+            log.debug("В бронировании с id={} отсутствует информация о вещи", bookingId);
             throw new NotFoundException("Отсутствует ссылка на вещь!");
+        }
         User owner = item.getOwner();
-        if (owner == null)
+        if (owner == null) {
+            log.debug("В бронировании с id={} отсутствует информация о хозяине вещи", bookingId);
             throw new NotFoundException("Отсутствует ссылка на хозяина вещи!");
+        }
         Long ownerId = owner.getId();
-        if (!ownerId.equals(userId))
+        if (!ownerId.equals(userId)) {
+            log.debug("Попытка пользователем с id={}, не являющимся хозяином вещи, изменить статус бронирования с id={}",
+                    userId, bookingId);
             throw new NotFoundException("Данный пользователь не может изменять статус бронирования!");
+        }
         return booking;
     }
 
@@ -253,25 +297,31 @@ public class BookingServiceImpl implements BookingService {
      * @param userId (идентификатор пользователя, который запрашивает информацию о бронировании)
      */
     private Booking validateGetBooking(Long bookingId, Long userId) {
-        if (!bookingJpaRepository.existsById(bookingId))
-            throw new NotFoundException("Бронирование не найдено!");
-
         Booking booking = bookingJpaRepository
                 .findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден!"));
+                .orElseThrow(() -> new NotFoundException("Бронирование не найдено!"));
         Item item = booking.getItem();
-        if (item == null)
+        if (item == null) {
+            log.debug("В бронировании с id={} отсутствует информация о вещи", bookingId);
             throw new NotFoundException("Отсутствует ссылка на вещь!");
+        }
         User owner = item.getOwner();
-        if (owner == null)
+        if (owner == null) {
+            log.debug("В бронировании с id={} отсутствует информация о хозяине вещи", bookingId);
             throw new NotFoundException("Отсутствует ссылка на хозяина вещи!");
+        }
         Long ownerId = owner.getId();
         User booker = booking.getBooker();
-        if (booker == null)
+        if (booker == null) {
+            log.debug("В бронировании с id={} отсутствует информация об авторе бронирования вещи", bookingId);
             throw new NotFoundException("Отсутствует ссылка на автора бронирования!");
+        }
         Long bookerId = booker.getId();
-        if (!ownerId.equals(userId) && !bookerId.equals(userId))
-            throw new NotFoundException("Данный пользователь не может изменять статус бронирования!");
+        if (!ownerId.equals(userId) && !bookerId.equals(userId)) {
+            log.debug("Пользователь с id={} не может получить информацию о бронировании, " +
+                    "поскольку не является хозяином вещи или автором бронирования", userId);
+            throw new NotFoundException("Данный пользователь не может получить информацию о бронировании!");
+        }
         return booking;
     }
 }

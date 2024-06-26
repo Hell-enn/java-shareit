@@ -25,11 +25,6 @@ import javax.validation.ConstraintViolationException;
 public class ErrorHandler {
 
     @ExceptionHandler
-    public ResponseEntity<Object> handleAlreadyExists(final AlreadyExistsException e) {
-        return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler
     public ResponseEntity<Object> handleBadRequest(final BadRequestException e) {
         return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
@@ -61,12 +56,12 @@ public class ErrorHandler {
 
     @ExceptionHandler
     public ResponseEntity<Object>  handleSqlException(DataIntegrityViolationException e) {
-        return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT);
     }
 
 
     @ExceptionHandler
-    public ResponseEntity<Object> handleUnsupportedOperationException(UnsupportedOperationException e) {
+    public ResponseEntity<Object> handleUnsupportedOperationException(final UnsupportedOperationException e) {
         return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 

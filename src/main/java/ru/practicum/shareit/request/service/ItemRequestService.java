@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request.service;
 
-import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestInDto;
+import ru.practicum.shareit.request.dto.ItemRequestOutDto;
 
 import java.util.List;
 
@@ -11,10 +12,12 @@ public interface ItemRequestService {
      * с сообщением об ошибке.
      * В случае успеха возвращает добавленный объект.
      *
-     * @param itemRequestDto ()
-     * @return
+     * @param itemRequestDto (объект запроса, который необходимо добавить)
+     * @param userId (идентификатор пользователя, который отправил запрос на добавление)
+     *
+     * @return ItemRequestOutDto
      */
-    ItemRequestDto postItemRequest(Long userId, ItemRequestDto itemRequestDto);
+    ItemRequestOutDto postItemRequest(Long userId, ItemRequestInDto itemRequestDto);
 
 
     /**
@@ -23,31 +26,43 @@ public interface ItemRequestService {
      * с сообщением об ошибке.
      * В случае успеха возвращает обновлённый объект.
      *
-     * @param itemRequestDto ()
-     * @return
-     */
-    ItemRequestDto patchItemRequest(Long userId, ItemRequestDto itemRequestDto, Long requestId);
-
-
-    /**
-     * Метод возвращает список запросов из хранилища.
+     * @param itemRequestDto (объект запроса с полями, которые необходимо обновить в уже существующем объекте)
+     * @param userId (идентификатор пользователя, отправившего запрос на обновление объекта в базе)
+     * @param requestId (идентификатор запроса, который необходимо обновить в базе)
      *
-     * @return
+     * @return ItemRequestOutDto
      */
-    List<ItemRequestDto> getItemRequests();
+    ItemRequestOutDto patchItemRequest(Long userId, ItemRequestInDto itemRequestDto, Long requestId);
 
 
     /**
-     * Метод удаляет запрос с itemRequestId из хранилища
-     */
-    void deleteItemRequest(long itemRequestId);
-
-
-    /**
-     * Метод возвращает объект запроса по его id из хранилища.
+     * Метод возвращает список запросов пользователя с идентификатором userId из хранилища.
      *
-     * @param id
-     * @return
+     * @param userId (идентификатор пользователя, чьи запросы необходимо вернуть)
+     *
+     * @return List<ItemRequestOutDto>
      */
-    ItemRequestDto getItemRequest(long id);
+    List<ItemRequestOutDto> getItemRequests(Long userId);
+
+
+    /**
+     * Метод возвращает объект запроса по его идентификатору id из хранилища.
+     *
+     * @param id (идентификатор запроса к вещи)
+     *
+     * @return ItemRequestOutDto
+     */
+    ItemRequestOutDto getItemRequest(Long id, Long userId);
+
+
+    /**
+     * Метод возвращает список запросов к вещам с позиции from в хранилище
+     * в количестве size в порядке от более новых к более старым.
+     *
+     * @param from (Порядковый номер элемента в соответствующей таблице в базе данных)
+     * @param size (Количество запросов, которое необходимо передать за один вызов метода)
+     *
+     * @return List<ItemRequestOutDto> (список запросов в количестве size)
+     */
+    List<ItemRequestOutDto> getAllItemRequests(Long userId, Integer from, Integer size);
 }

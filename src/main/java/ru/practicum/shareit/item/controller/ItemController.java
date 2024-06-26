@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -9,6 +10,8 @@ import ru.practicum.shareit.item.dto.ItemGetDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 /**
@@ -22,6 +25,7 @@ import java.util.List;
 @RequestMapping(path = "/items")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class ItemController {
 
     private final ItemService itemServiceImpl;
@@ -86,27 +90,11 @@ public class ItemController {
      * @return List<ItemGetDto>
      */
     @GetMapping
-    public List<ItemGetDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemGetDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                     @RequestParam(defaultValue = "0") @PositiveOrZero String from,
+                                     @RequestParam(defaultValue = "20") @Positive String size) {
         log.debug("Принят запрос на получение списка всех вещей пользователя с id={}", userId);
-        return itemServiceImpl.getItems(userId);
-    }
-
-
-    /**
-     * Эндпоинт. Контроллер получает HTTP-запрос на удаление
-     * объекта типа Item и направляет его в текущий эндпоинт.
-     * С помощью Spring-аннотаций метод преобразует
-     * запрос в понятный java объект типа Long.
-     * В рамках текущего метода происходит маршрутизация передаваемого
-     * объекта в метод уровня сервиса, содержащего бизнес-логику
-     * удаления объекта типа Item из хранилища.
-     *
-     * @param itemId (объект вещи, которую необходимо удалить из хранилища)
-     */
-    @DeleteMapping("/{id}")
-    public void deleteItem(@PathVariable(name = "id") Long itemId) {
-        log.debug("Принят запрос на удаление вещи с id={}", itemId);
-        itemServiceImpl.deleteItem(itemId);
+        return itemServiceImpl.getItems(userId, Integer.parseInt(from), Integer.parseInt(size));
     }
 
 
@@ -119,8 +107,8 @@ public class ItemController {
      * объекта в метод уровня сервиса, содержащего бизнес-логику
      * извлечения объекта типа Item из хранилища.
      *
-     * @param itemId (объект арендуемой вещи, который необходимо удалить из хранилища)
-     * @param userId (идентификатор пользователя, запрашивающего информацию о вещи)
+     * @param itemId (идентификатор арендуемой вещи, которую необходимо удалить из хранилища)
+     * @param userId (идентификатор пользователя, отправившего запрос на удаление вещи)
      *
      * @return ItemGetDto
      */
@@ -147,9 +135,11 @@ public class ItemController {
      */
     @GetMapping("/search")
     public List<ItemGetDto> getItemsBySearch(@RequestParam String text,
-                                             @RequestHeader("X-Sharer-User-Id") Long userId) {
+                                             @RequestHeader("X-Sharer-User-Id") Long userId,
+                                             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                             @RequestParam(defaultValue = "20") @Positive Integer size) {
         log.debug("Принят запрос на получение списка вещей, удовлетворяющих запросу '{}'", text);
-        return itemServiceImpl.getItemsBySearch(text, userId);
+        return itemServiceImpl.getItemsBySearch(text, userId, from, size);
     }
 
 

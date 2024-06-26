@@ -2,12 +2,15 @@ package ru.practicum.shareit.booking.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingOutcomingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 /**
@@ -21,6 +24,7 @@ import java.util.List;
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class BookingController {
 
     private final BookingService bookingServiceImpl;
@@ -65,6 +69,7 @@ public class BookingController {
     public BookingOutcomingDto approveBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
                                      @RequestParam Boolean approved,
                                      @PathVariable Long bookingId) {
+        log.debug("Принят запрос на " + (approved ? "подтверждение" : "отклонение") + " бронирования пользователем с id={}", userId);
         return bookingServiceImpl.patchBooking(userId, approved, bookingId);
     }
 
@@ -105,9 +110,11 @@ public class BookingController {
      */
     @GetMapping
     public List<BookingOutcomingDto> getUserBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                        @RequestParam(defaultValue = "ALL") String state) {
+                                                     @RequestParam(defaultValue = "ALL") String state,
+                                                     @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                                     @RequestParam(defaultValue = "20") @Positive Integer size) {
         log.debug("Принят запрос на получение списка всех бронирований");
-        return bookingServiceImpl.getBookings(userId, state);
+        return bookingServiceImpl.getBookings(userId, state, from, size);
     }
 
 
@@ -126,20 +133,10 @@ public class BookingController {
      */
     @GetMapping("/owner")
     public List<BookingOutcomingDto> getUserStuffBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                            @RequestParam(defaultValue = "ALL") String state) {
+                                                          @RequestParam(defaultValue = "ALL") String state,
+                                                          @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                                          @RequestParam(defaultValue = "20") @Positive Integer size) {
         log.debug("Принят запрос на получение списка всех бронирований");
-        return bookingServiceImpl.getUserStuffBookings(userId, state);
-    }
-
-
-    /**
-     * Эндпоинт. Удаляет бронирование с bookingId
-     *
-     * @param bookingId
-     */
-    @DeleteMapping("/{id}")
-    public void deleteBooking(@PathVariable(name = "id") Long bookingId) {
-        log.debug("Принят запрос на удаление бронирования с id={}", bookingId);
-        bookingServiceImpl.deleteBooking(bookingId);
+        return bookingServiceImpl.getUserStuffBookings(userId, state, from, size);
     }
 }

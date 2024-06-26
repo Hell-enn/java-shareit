@@ -58,17 +58,7 @@ public interface ItemService {
      *
      * @return List<ItemDto>
      */
-    List<ItemGetDto> getItems(Long userId);
-
-
-    /**
-     * Включает маршрутизацию в слой доступа к данным
-     * (метод удаления из хранилища арендуемых вещей с идентификатором itemId).
-     *
-     * @param itemId (идентификатор объекта типа Item, который нужно удалить
-     *                из хранилища)
-     */
-    void deleteItem(Long itemId);
+    List<ItemGetDto> getItems(Long userId, Integer from, Integer size);
 
 
     /**
@@ -94,7 +84,7 @@ public interface ItemService {
      *
      * @return List<ItemDto>
      */
-    List<ItemGetDto> getItemsBySearch(String text, Long userId);
+    List<ItemGetDto> getItemsBySearch(String text, Long userId, Integer from, Integer size);
 
 
     CommentDto addComment(Long itemId, CommentDto commentDto, Long userId);

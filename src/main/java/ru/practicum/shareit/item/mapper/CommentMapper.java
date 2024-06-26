@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemJpaRepository;
+import ru.practicum.shareit.item.repository.ItemPagingAndSortingRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserJpaRepository;
 
@@ -16,7 +16,7 @@ import java.util.Optional;
 @Component
 public class CommentMapper {
     private final UserJpaRepository userJpaRepository;
-    private final ItemJpaRepository itemJpaRepository;
+    private final ItemPagingAndSortingRepository itemPagingAndSortingRepository;
 
     public CommentDto toCommentDto(Comment comment) {
         User user = comment.getAuthor();
@@ -35,10 +35,10 @@ public class CommentMapper {
         User user = null;
         if (userOpt.isPresent())
             user = userOpt.get();
-        Optional<Item> itemOpt = itemJpaRepository.findById(itemId);
+        Optional<Item> itemOpt = itemPagingAndSortingRepository.findById(itemId);
         Item item = null;
         if (itemOpt.isPresent())
             item = itemOpt.get();
-        return new Comment(0, commentDto.getText(), user, item, LocalDateTime.now());
+        return new Comment(0L, commentDto.getText(), user, item, LocalDateTime.now());
     }
 }

@@ -9,6 +9,7 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemGetDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentJpaRepository;
@@ -49,14 +50,26 @@ public class ItemMapper {
         );
     }
 
+
+    public ItemResponseDto toItemResponseDto(Item item) {
+        return new ItemResponseDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getRequest() != null ? item.getRequest().getId() : null,
+                item.getAvailable()
+        );
+    }
+
+
     public Item toItem(ItemDto itemDto, Long userId) {
         User user = userJpaRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден!"));
-        Long requestId = itemDto.getRequest();
+        Long requestId = itemDto.getRequestId();
         ItemRequest itemRequest = null;
         if (requestId != null)
             itemRequest = requestJpaRepository.findById(requestId).orElseThrow(() -> new NotFoundException("Запрос не найден!"));
         return new Item(
-                0,
+                0L,
                 itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
@@ -115,5 +128,12 @@ public class ItemMapper {
 
         if (itemDto.getAvailable() != null && !item.getAvailable().equals(itemDto.getAvailable()))
             item.setAvailable(itemDto.getAvailable());
+    }
+
+
+    public List<ItemGetDto> toItemGetDtos(List<Item> items, Long userId) {
+        List<ItemGetDto> itemGetDtos = new ArrayList<>();
+        items.forEach(item -> itemGetDtos.add(toItemGetDto(item, userId)));
+        return itemGetDtos;
     }
 }
