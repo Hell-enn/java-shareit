@@ -7,9 +7,9 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.booking.dto.BookingDto;
 
-import java.time.LocalDateTime;
-
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+
+import java.time.LocalDateTime;
 
 @JsonTest
 public class BookingDtoTest {
