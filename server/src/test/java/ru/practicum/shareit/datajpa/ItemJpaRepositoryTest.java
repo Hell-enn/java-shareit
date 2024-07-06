@@ -106,7 +106,7 @@ public class ItemJpaRepositoryTest {
         Assertions.assertEquals(items, addedItems);
 
         items = List.of();
-        addedItems = itemPagingAndSortingRepository.findByRequestId(10L);
+        addedItems = itemPagingAndSortingRepository.findByRequestId(111L);
         Assertions.assertEquals(items, addedItems);
     }
 

@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.dao.DataIntegrityViolationException;
 import ru.practicum.shareit.exception.AlreadyExistsException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -80,7 +81,7 @@ public class UserServiceTest {
 
 
     @Test
-    public void testPostUserDataIntegrityException() {
+    public void testPostUserAlreadyExistsException() {
         Mockito
                 .when(mockUserJpaRepository.save(Mockito.any(User.class)))
                 .thenThrow(new AlreadyExistsException("Ошибка при добавлении пользователя!"));
@@ -89,6 +90,22 @@ public class UserServiceTest {
 
         final AlreadyExistsException exception = Assertions.assertThrows(
                 AlreadyExistsException.class,
+                () -> userService.postUser(userDto));
+
+        Assertions.assertEquals("Ошибка при добавлении пользователя!", exception.getMessage());
+    }
+
+
+    @Test
+    public void testPostUserDataIntegrityException() {
+        Mockito
+                .when(mockUserJpaRepository.save(Mockito.any(User.class)))
+                .thenThrow(new DataIntegrityViolationException("Ошибка при добавлении пользователя!"));
+
+        UserDto userDto = new UserDto(null, "Ivan Ivanov", "email111@mail.com");
+
+        final DataIntegrityViolationException exception = Assertions.assertThrows(
+                DataIntegrityViolationException.class,
                 () -> userService.postUser(userDto));
 
         Assertions.assertEquals("Ошибка при добавлении пользователя!", exception.getMessage());
@@ -173,6 +190,20 @@ public class UserServiceTest {
         Mockito
                 .when(mockUserJpaRepository.findById(Mockito.anyLong()))
                 .thenThrow(new NotFoundException("Пользователь не найден!"));
+
+        final NotFoundException exception = Assertions.assertThrows(
+                NotFoundException.class,
+                () -> userService.getUser(1L));
+
+        Assertions.assertEquals("Пользователь не найден!", exception.getMessage());
+    }
+
+
+    @Test
+    public void testGetUserNotFoundEmptyOpt() {
+        Mockito
+                .when(mockUserJpaRepository.findById(Mockito.anyLong()))
+                .thenReturn(Optional.empty());
 
         final NotFoundException exception = Assertions.assertThrows(
                 NotFoundException.class,

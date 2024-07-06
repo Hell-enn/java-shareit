@@ -1,6 +1,7 @@
 package ru.practicum.shareit.integrational;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,13 +10,16 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemGetDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.persistence.EntityManager;
@@ -115,5 +119,18 @@ public class ItemServiceTest {
         assertThat(mappedCommentDto.getAuthor(), equalTo(commentDto1.getAuthor()));
         assertThat(mappedCommentDto.getItem(), equalTo(commentDto1.getItem()));
         assertThat(mappedCommentDto.getAuthorName(), equalTo(commentDto1.getAuthorName()));
+    }
+
+
+    @Test
+    public void testItemMapping() {
+        User owner = new User(1L, "Petr Petrov", "petrpetrov@gmail.com");
+        User requester = new User(2L, "Ivan Ivanov", "ivanivanov@gmail.com");
+        LocalDateTime now = LocalDateTime.now();
+        ItemRequest itemRequest = new ItemRequest(1L, "description", requester, now);
+        Item item = new Item(1L, "name", "description", true, owner, itemRequest);
+
+        ItemResponseDto itemResponseDto = new ItemResponseDto(1L, "name", "description", 1L, true);
+        Assertions.assertEquals(itemResponseDto, itemMapper.toItemResponseDto(item));
     }
 }

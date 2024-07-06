@@ -86,8 +86,8 @@ public class BookingOutcomingDtoTest {
         LocalDateTime now = LocalDateTime.now();
         ItemDto item = new ItemDto(1L, "name", "description", true, 1L, 1L, List.of());
 
-        final IllegalArgumentException exception = Assertions.assertThrows(
-                IllegalArgumentException.class,
+        final NullPointerException exception = Assertions.assertThrows(
+                NullPointerException.class,
                 () -> new BookingOutcomingDto(
                         1L,
                         now.minusDays(1),

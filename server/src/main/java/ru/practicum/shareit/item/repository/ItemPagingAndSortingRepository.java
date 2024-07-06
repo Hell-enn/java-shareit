@@ -10,7 +10,7 @@ import java.util.List;
 
 
 public interface ItemPagingAndSortingRepository extends PagingAndSortingRepository<Item, Long>, CrudRepository<Item, Long> {
-    @Query("select it from Item as it join it.owner as u where u.id = ?1 ")
+    @Query("select it from Item as it join it.owner as u where u.id = ?1 order by it.id")
     List<Item> findByUserId(Long userId, Pageable page);
 
     @Query("select it from Item as it join it.request as r where r.id = ?1 ")

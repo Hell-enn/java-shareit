@@ -61,7 +61,7 @@ public class ErrorHandler {
 
 
     @ExceptionHandler
-    public ResponseEntity<Object> handleUnsupportedOperationException(final java.lang.UnsupportedOperationException e) {
+    public ResponseEntity<Object> handleUnsupportedOperationException(final UnsupportedOperationException e) {
         return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
