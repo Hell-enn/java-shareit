@@ -9,6 +9,13 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+/**
+ * Модель данных пользователя для публикации, приходящая в теле HTTP-запроса в микросервис-шлюз.
+ * Содержит поля:
+ *  id - идентификатор объекта пользователя,
+ *  name - имя пользователя,
+ *  email - адрес электронной почты пользователя.
+ */
 @Data
 @AllArgsConstructor
 @Getter

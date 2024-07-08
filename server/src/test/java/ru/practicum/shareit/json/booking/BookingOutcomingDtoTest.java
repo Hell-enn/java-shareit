@@ -79,21 +79,4 @@ public class BookingOutcomingDtoTest {
 
         assertThat(json.parse(jsonBookingOutcomingDto)).usingRecursiveComparison().isEqualTo(bookingOutcomingDto);
     }
-
-    @Test
-    public void testItemRequestInDtoWithoutBooker() throws Exception {
-
-        LocalDateTime now = LocalDateTime.now();
-        ItemDto item = new ItemDto(1L, "name", "description", true, 1L, 1L, List.of());
-
-        final NullPointerException exception = Assertions.assertThrows(
-                NullPointerException.class,
-                () -> new BookingOutcomingDto(
-                        1L,
-                        now.minusDays(1),
-                        now.plusHours(2),
-                        item,
-                        null,
-                        "APPROVED"));
-    }
 }

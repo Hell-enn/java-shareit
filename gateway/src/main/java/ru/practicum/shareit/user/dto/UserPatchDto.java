@@ -8,6 +8,12 @@ import lombok.Setter;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Size;
 
+/**
+ * Модель данных пользователя для обновления, приходящая в теле HTTP-запроса в микросервис-шлюз.
+ * Содержит поля:
+ *  name - имя пользователя,
+ *  email - адрес электронной почты пользователя.
+ */
 @Data
 @AllArgsConstructor
 @Getter

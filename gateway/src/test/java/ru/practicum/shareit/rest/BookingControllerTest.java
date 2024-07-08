@@ -18,8 +18,8 @@ import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.exception.UnsupportedOperationException;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.dto.BookingOutcomingTestDto;
+import ru.practicum.shareit.item.dto.ItemPostDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.nio.charset.StandardCharsets;
@@ -49,7 +49,7 @@ public class BookingControllerTest {
         LocalDateTime start = LocalDateTime.now().plusDays(1);
         LocalDateTime end = LocalDateTime.now().plusDays(2);
 
-        ItemDto itemDto = new ItemDto(1L, "name", "description", true, 2L, 2L, List.of());
+        ItemPostDto itemDto = new ItemPostDto(1L, "name", "description", true, 2L, 2L, List.of());
         UserDto booker = new UserDto(1L, "Petr Petrov", "petrpetrov@gmail.com");
 
         BookingDto bookingDto = new BookingDto(1L, start, end, 1L, 1L, null);
@@ -65,10 +65,6 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(bookingOutcomingDto.getId()), Long.class))
-                //.andExpect(jsonPath("$.start", is(bookingOutcomingDto.getStart().toString().substring(0, bookingOutcomingDto.getStart().toString().length() - 2))))
-                //.andExpect(jsonPath("$.end", is(bookingOutcomingDto.getEnd().toString().substring(0, bookingOutcomingDto.getEnd().toString().length() - 2))))
-                //.andExpect(jsonPath("$.item", is(bookingOutcomingDto.getItem())))
-                //.andExpect(jsonPath("$.booker", is(bookingOutcomingDto.getBooker())))
                 .andExpect(jsonPath("$.status", is(bookingOutcomingDto.getStatus())));
     }
 
@@ -141,7 +137,7 @@ public class BookingControllerTest {
         LocalDateTime start = LocalDateTime.now().plusDays(1);
         LocalDateTime end = LocalDateTime.now().plusDays(2);
 
-        ItemDto itemDto = new ItemDto(1L, "name", "description", true, 2L, 2L, List.of());
+        ItemPostDto itemDto = new ItemPostDto(1L, "name", "description", true, 2L, 2L, List.of());
         UserDto booker = new UserDto(1L, "Petr Petrov", "petrpetrov@gmail.com");
 
         BookingDto bookingDto = new BookingDto(1L, start, end, 1L, 1L, null);
@@ -157,10 +153,6 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(bookingOutcomingDto.getId()), Long.class))
-                //.andExpect(jsonPath("$.start", is(bookingOutcomingDto.getStart().toString().substring(0, bookingOutcomingDto.getStart().toString().length() - 2))))
-                //.andExpect(jsonPath("$.end", is(bookingOutcomingDto.getEnd().toString().substring(0, bookingOutcomingDto.getEnd().toString().length() - 2))))
-                //.andExpect(jsonPath("$.item", is(bookingOutcomingDto.getItem())))
-                //.andExpect(jsonPath("$.booker", is(bookingOutcomingDto.getBooker())))
                 .andExpect(jsonPath("$.status", is(bookingOutcomingDto.getStatus())));
     }
 
@@ -191,7 +183,7 @@ public class BookingControllerTest {
         LocalDateTime start = LocalDateTime.now().plusDays(1);
         LocalDateTime end = LocalDateTime.now().plusDays(2);
 
-        ItemDto itemDto = new ItemDto(1L, "name", "description", true, 2L, 2L, List.of());
+        ItemPostDto itemDto = new ItemPostDto(1L, "name", "description", true, 2L, 2L, List.of());
         UserDto booker = new UserDto(1L, "Petr Petrov", "petrpetrov@gmail.com");
 
         BookingDto bookingDto = new BookingDto(1L, start, end, 1L, 1L, null);
@@ -207,10 +199,6 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(bookingOutcomingDto.getId()), Long.class))
-                //.andExpect(jsonPath("$.start", is(bookingOutcomingDto.getStart().toString().substring(0, bookingOutcomingDto.getStart().toString().length() - 2))))
-                //.andExpect(jsonPath("$.end", is(bookingOutcomingDto.getEnd().toString().substring(0, bookingOutcomingDto.getEnd().toString().length() - 2))))
-                //.andExpect(jsonPath("$.item", is(bookingOutcomingDto.getItem())))
-                //.andExpect(jsonPath("$.booker", is(bookingOutcomingDto.getBooker())))
                 .andExpect(jsonPath("$.status", is(bookingOutcomingDto.getStatus())));
     }
 
@@ -245,12 +233,11 @@ public class BookingControllerTest {
         LocalDateTime start3 = LocalDateTime.now().plusDays(3);
         LocalDateTime end3 = LocalDateTime.now().plusDays(4);
 
-        BookingDto bookingDto = new BookingDto(1L, start1, end1, 1L, 1L, null);
         UserDto booker = new UserDto(1L, "Petr Petrov", "petrpetrov@gmail.com");
 
-        ItemDto itemDto1 = new ItemDto(1L, "name1", "description1", true, 2L, 2L, List.of());
-        ItemDto itemDto2 = new ItemDto(2L, "name2", "description2", true, 3L, 4L, List.of());
-        ItemDto itemDto3 = new ItemDto(3L, "name3", "description3", true, 4L, 6L, List.of());
+        ItemPostDto itemDto1 = new ItemPostDto(1L, "name1", "description1", true, 2L, 2L, List.of());
+        ItemPostDto itemDto2 = new ItemPostDto(2L, "name2", "description2", true, 3L, 4L, List.of());
+        ItemPostDto itemDto3 = new ItemPostDto(3L, "name3", "description3", true, 4L, 6L, List.of());
 
         BookingOutcomingTestDto bookingOutcomingDto1 = new BookingOutcomingTestDto(1L, start1, end1, itemDto1, booker, "WAITING");
         BookingOutcomingTestDto bookingOutcomingDto2 = new BookingOutcomingTestDto(2L, start2, end2, itemDto2, booker, "WAITING");
@@ -268,22 +255,10 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id", is(bookingOutcomingDto1.getId()), Long.class))
-                //.andExpect(jsonPath("$[0].start", is(bookingOutcomingDto1.getStart().toString().substring(0, bookingOutcomingDto1.getStart().toString().length() - 2))))
-                //.andExpect(jsonPath("$[0].end", is(bookingOutcomingDto1.getEnd().toString().substring(0, bookingOutcomingDto1.getEnd().toString().length() - 2))))
-                //.andExpect(jsonPath("$[0].item", is(bookingOutcomingDto1.getItem())))
-                //.andExpect(jsonPath("$[0].booker", is(bookingOutcomingDto1.getBooker())))
                 .andExpect(jsonPath("$[1].status", is(bookingOutcomingDto1.getStatus())))
                 .andExpect(jsonPath("$[1].id", is(bookingOutcomingDto2.getId()), Long.class))
-                //.andExpect(jsonPath("$[1].start", is(bookingOutcomingDto2.getStart().toString().substring(0, bookingOutcomingDto2.getStart().toString().length() - 2))))
-                //.andExpect(jsonPath("$[1].end", is(bookingOutcomingDto2.getEnd().toString().substring(0, bookingOutcomingDto2.getEnd().toString().length() - 2))))
-                //.andExpect(jsonPath("$[1].item", is(bookingOutcomingDto2.getItem())))
-                //.andExpect(jsonPath("$[1].booker", is(bookingOutcomingDto2.getBooker())))
                 .andExpect(jsonPath("$[1].status", is(bookingOutcomingDto2.getStatus())))
                 .andExpect(jsonPath("$[2].id", is(bookingOutcomingDto3.getId()), Long.class))
-                //.andExpect(jsonPath("$[2].start", is(bookingOutcomingDto3.getStart().toString().substring(0, bookingOutcomingDto3.getStart().toString().length() - 2))))
-                //.andExpect(jsonPath("$[2].end", is(bookingOutcomingDto3.getEnd().toString().substring(0, bookingOutcomingDto3.getEnd().toString().length() - 2))))
-                //.andExpect(jsonPath("$[2].item", is(bookingOutcomingDto3.getItem())))
-                //.andExpect(jsonPath("$[2].booker", is(bookingOutcomingDto3.getBooker())))
                 .andExpect(jsonPath("$[2].status", is(bookingOutcomingDto3.getStatus())));
     }
 
@@ -366,12 +341,11 @@ public class BookingControllerTest {
         LocalDateTime start3 = LocalDateTime.now().plusDays(3);
         LocalDateTime end3 = LocalDateTime.now().plusDays(4);
 
-        BookingDto bookingDto = new BookingDto(1L, start1, end1, 1L, 1L, null);
         UserDto booker = new UserDto(1L, "Petr Petrov", "petrpetrov@gmail.com");
 
-        ItemDto itemDto1 = new ItemDto(1L, "name1", "description1", true, 2L, 2L, List.of());
-        ItemDto itemDto2 = new ItemDto(2L, "name2", "description2", true, 2L, 4L, List.of());
-        ItemDto itemDto3 = new ItemDto(3L, "name3", "description3", true, 2L, 6L, List.of());
+        ItemPostDto itemDto1 = new ItemPostDto(1L, "name1", "description1", true, 2L, 2L, List.of());
+        ItemPostDto itemDto2 = new ItemPostDto(2L, "name2", "description2", true, 2L, 4L, List.of());
+        ItemPostDto itemDto3 = new ItemPostDto(3L, "name3", "description3", true, 2L, 6L, List.of());
 
         BookingOutcomingTestDto bookingOutcomingDto1 = new BookingOutcomingTestDto(1L, start1, end1, itemDto1, booker, "WAITING");
         BookingOutcomingTestDto bookingOutcomingDto2 = new BookingOutcomingTestDto(2L, start2, end2, itemDto2, booker, "WAITING");
@@ -389,22 +363,10 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id", is(bookingOutcomingDto1.getId()), Long.class))
-                //.andExpect(jsonPath("$[0].start", is(bookingOutcomingDto1.getStart().toString().substring(0, bookingOutcomingDto1.getStart().toString().length() - 2))))
-                //.andExpect(jsonPath("$[0].end", is(bookingOutcomingDto1.getEnd().toString().substring(0, bookingOutcomingDto1.getEnd().toString().length() - 2))))
-                //.andExpect(jsonPath("$[0].item", is(bookingOutcomingDto1.getItem())))
-                //.andExpect(jsonPath("$[0].booker", is(bookingOutcomingDto1.getBooker())))
                 .andExpect(jsonPath("$[1].status", is(bookingOutcomingDto1.getStatus())))
                 .andExpect(jsonPath("$[1].id", is(bookingOutcomingDto2.getId()), Long.class))
-                //.andExpect(jsonPath("$[1].start", is(bookingOutcomingDto2.getStart().toString().substring(0, bookingOutcomingDto2.getStart().toString().length() - 2))))
-                //.andExpect(jsonPath("$[1].end", is(bookingOutcomingDto2.getEnd().toString().substring(0, bookingOutcomingDto2.getEnd().toString().length() - 2))))
-                //.andExpect(jsonPath("$[1].item", is(bookingOutcomingDto2.getItem())))
-                //.andExpect(jsonPath("$[1].booker", is(bookingOutcomingDto2.getBooker())))
                 .andExpect(jsonPath("$[1].status", is(bookingOutcomingDto2.getStatus())))
                 .andExpect(jsonPath("$[2].id", is(bookingOutcomingDto3.getId()), Long.class))
-                //.andExpect(jsonPath("$[2].start", is(bookingOutcomingDto3.getStart().toString().substring(0, bookingOutcomingDto3.getStart().toString().length() - 2))))
-                //.andExpect(jsonPath("$[2].end", is(bookingOutcomingDto3.getEnd().toString().substring(0, bookingOutcomingDto3.getEnd().toString().length() - 2))))
-                //.andExpect(jsonPath("$[2].item", is(bookingOutcomingDto3.getItem())))
-                //.andExpect(jsonPath("$[2].booker", is(bookingOutcomingDto3.getBooker())))
                 .andExpect(jsonPath("$[2].status", is(bookingOutcomingDto3.getStatus())));
     }
 

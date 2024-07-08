@@ -85,40 +85,6 @@ public class ItemRequestServiceTest {
 
 
     @Test
-    public void testPostItemRequestWithoutItemRequestInfo() {
-        Mockito
-                .when(mockUserJpaRepository.existsById(Mockito.anyLong()))
-                .thenReturn(true);
-
-        final ValidationException exception = Assertions.assertThrows(
-                ValidationException.class,
-                () -> itemRequestService.postItemRequest(1L, null));
-
-        Assertions.assertEquals("Вы не передали информацию о запросе!", exception.getMessage());
-    }
-
-
-    @Test
-    public void testPostItemRequestWithoutDescription() {
-        ItemRequestInDto itemRequestInDto1 = new ItemRequestInDto(1L, "", 1L);
-        ItemRequestInDto itemRequestInDto2 = new ItemRequestInDto(1L, null, 1L);
-        Mockito
-                .when(mockUserJpaRepository.existsById(Mockito.anyLong()))
-                .thenReturn(true);
-
-        final BadRequestException exception1 = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> itemRequestService.postItemRequest(1L, itemRequestInDto1));
-        Assertions.assertEquals("Вы не передали описание запроса!", exception1.getMessage());
-
-        final BadRequestException exception2 = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> itemRequestService.postItemRequest(1L, itemRequestInDto2));
-        Assertions.assertEquals("Вы не передали описание запроса!", exception2.getMessage());
-    }
-
-
-    @Test
     public void testPatchItemRequestOk() {
         LocalDateTime now = LocalDateTime.now();
         User requester = new User(1L, "Ivan Ivanov", "ivanivanov@gmail.com");
@@ -139,16 +105,6 @@ public class ItemRequestServiceTest {
                 .when(mockItemRequestMapper.toItemRequestOutDto(Mockito.any(ItemRequest.class)))
                 .thenReturn(itemRequestOutDto);
         Assertions.assertEquals(itemRequestService.patchItemRequest(1L, itemRequestInDto, 1L), itemRequestOutDto);
-    }
-
-
-    @Test
-    public void testPatchItemRequestWithoutUpdates() {
-        final ValidationException exception = Assertions.assertThrows(
-                ValidationException.class,
-                () -> itemRequestService.patchItemRequest(1L, null, 1L));
-
-        Assertions.assertEquals("Вы не передали информацию о запросе!", exception.getMessage());
     }
 
 

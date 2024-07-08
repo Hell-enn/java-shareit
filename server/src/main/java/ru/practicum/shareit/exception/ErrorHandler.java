@@ -12,8 +12,6 @@ import ru.practicum.shareit.item.controller.ItemServerController;
 import ru.practicum.shareit.request.controller.RequestServerController;
 import ru.practicum.shareit.user.controller.UserServerController;
 
-import javax.validation.ConstraintViolationException;
-
 
 /**
  * Класс-обработчик ErrorHandler предназначен для
@@ -63,12 +61,6 @@ public class ErrorHandler {
     @ExceptionHandler
     public ResponseEntity<Object> handleUnsupportedOperationException(final UnsupportedOperationException e) {
         return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
-    }
-
-
-    @ExceptionHandler
-    public ResponseEntity<Object> handleConstraintViolation(final ConstraintViolationException e) {
-        return new ResponseEntity<>("Входящий объект не прошёл валидацию!", new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
 

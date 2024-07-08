@@ -181,21 +181,13 @@ public class BookingServiceImpl implements BookingService {
      */
     private void validateNewBooking(BookingDto bookingDto, Long userId) {
 
-        if (bookingDto == null) {
-            log.debug("Для валидации нового бронирования не передан объект типа BookingDto(null)");
-            throw new BadRequestException("Вы не передали информацию о бронировании!");
-        }
-
         if (!userJpaRepository.existsById(userId)) {
             log.debug("Объект типа User с id={} отсутствует в базе данных", userId);
             throw new NotFoundException("Пользователь не найден!");
         }
 
         Long itemId = bookingDto.getItemId();
-        if (itemId == null) {
-            log.debug("Не передан id объекта типа Item, для которого добавляется объект типа Booking");
-            throw new ValidationException("Ссылка на вещь отсутствует!");
-        }
+
         Optional<Item> itemOpt = itemPagingAndSortingRepository.findById(itemId);
         Boolean available = itemOpt
                     .orElseThrow(() -> new NotFoundException("Вещь не найдена!"))

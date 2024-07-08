@@ -95,59 +95,6 @@ public class ItemServiceTest {
 
 
     @Test
-    public void testPostItemNull() {
-        Mockito
-                .when(mockItemPagingAndSortingRepository.save(Mockito.any(Item.class)))
-                .thenThrow(new ValidationException("Вы не передали информацию о вещи!"));
-
-        final ValidationException exception = Assertions.assertThrows(
-                ValidationException.class,
-                () -> itemService.postItem(1L, null));
-
-        Assertions.assertEquals("Вы не передали информацию о вещи!", exception.getMessage());
-    }
-
-
-    @Test
-    public void testPostItemWithoutName() {
-        ItemDto itemDto = new ItemDto(1L, null, "description2", true, 1L, null, List.of());
-        final ValidationException exception = Assertions.assertThrows(
-                ValidationException.class,
-                () -> itemService.postItem(1L, itemDto));
-
-        Assertions.assertEquals("Название вещи отсутствует!", exception.getMessage());
-    }
-
-
-    @Test
-    public void testPostItemWithoutDescription() {
-        ItemDto itemDto1 = new ItemDto(1L, "name1", null, true, 1L, null, List.of());
-        ItemDto itemDto2 = new ItemDto(1L, "name1", "", true, 1L, null, List.of());
-
-        final BadRequestException exception1 = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> itemService.postItem(1L, itemDto1));
-        Assertions.assertEquals("Описание вещи отсутствует!", exception1.getMessage());
-
-        final BadRequestException exception2 = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> itemService.postItem(1L, itemDto2));
-        Assertions.assertEquals("Описание вещи отсутствует!", exception2.getMessage());
-    }
-
-
-    @Test
-    public void testPostItemWithoutStatus() {
-        ItemDto itemDto = new ItemDto(1L, "name1", "description2", null, 1L, null, List.of());
-        final BadRequestException exception = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> itemService.postItem(1L, itemDto));
-
-        Assertions.assertEquals("Статус вещи отсутствует!", exception.getMessage());
-    }
-
-
-    @Test
     public void testPostItemWhenUserDoesNotExist() {
         ItemDto itemDto = new ItemDto(1L, "name1", "description2", true, 111L, null, List.of());
         final NotFoundException exception = Assertions.assertThrows(
@@ -194,13 +141,13 @@ public class ItemServiceTest {
     public void testPatchItemNull() {
         Mockito
                 .when(mockItemPagingAndSortingRepository.save(Mockito.any(Item.class)))
-                .thenThrow(new NotFoundException("Вы не передали информацию о вещи!"));
+                .thenThrow(new NotFoundException("Вещь не найдена!"));
 
         final NotFoundException exception = Assertions.assertThrows(
                 NotFoundException.class,
                 () -> itemService.patchItem(1L, null, 1L));
 
-        Assertions.assertEquals("Вы не передали информацию о вещи!", exception.getMessage());
+        Assertions.assertEquals("Вещь не найдена!", exception.getMessage());
     }
 
 

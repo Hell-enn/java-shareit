@@ -10,7 +10,6 @@ import ru.practicum.shareit.booking.repository.BookingJpaRepository;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemGetDto;
@@ -44,7 +43,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto postItem(Long userId, ItemDto itemDto) {
-        validateNewItem(itemDto, userId);
+        if (!userJpaRepository.existsById(userId)) {
+            log.debug("Объект типа User с id={} отсутствует в базе данных", userId);
+            throw new NotFoundException("Пользователь не существует!");
+        }
         Item item = itemMapper.toItem(itemDto, userId);
         log.debug("Сохранение вещи с id={} в базу данных", itemDto.getId());
         return itemMapper.toItemDto(itemPagingAndSortingRepository.save(item));
@@ -141,42 +143,6 @@ public class ItemServiceImpl implements ItemService {
     /**
      * Закрытый служебный метод проверяет объект типа Item
      * на соответствие ряду условий. Используется впоследствии
-     * для валидации объекта типа ItemDto при попытке его добавления
-     * в списке.
-     * В случае неудачи выбрасывает исключение ValidationException
-     * с сообщением об ошибке.
-     *
-     * @param itemDto (объект валидации)
-     */
-    private void validateNewItem(ItemDto itemDto, Long userId) {
-
-        String message = "";
-
-        if (itemDto == null)
-            message = "Вы не передали информацию о вещи!";
-        else if (itemDto.getName() == null || itemDto.getName().isBlank())
-            message = "Название вещи отсутствует!";
-        else if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            log.debug("Поле description для вещи \"{}\" не передано совсем или передана пустая строка", itemDto.getName());
-            throw new BadRequestException("Описание вещи отсутствует!");
-        } else if (itemDto.getAvailable() == null) {
-            log.debug("Не передан статус вещи {} пользователя с id={}", itemDto.getName(), userId);
-            throw new BadRequestException("Статус вещи отсутствует!");
-        } else if (!userJpaRepository.existsById(userId)) {
-            log.debug("Объект типа User с id={} отсутствует в базе данных", userId);
-            throw new NotFoundException("Пользователь не существует!");
-        }
-
-        if (!message.isBlank()) {
-            log.debug(message);
-            throw new ValidationException(message);
-        }
-    }
-
-
-    /**
-     * Закрытый служебный метод проверяет объект типа Item
-     * на соответствие ряду условий. Используется впоследствии
      * для валидации объекта типа ItemDto при попытке его обновления в списке.
      * В случае неудачи выбрасывает исключение ValidationException
      * с сообщением об ошибке.
@@ -184,11 +150,6 @@ public class ItemServiceImpl implements ItemService {
      * @param itemDto (объект валидации)
      */
     private Item validateUpdateItem(Long userId, Long itemId, ItemDto itemDto) {
-
-        if (itemDto == null) {
-            log.debug("Объект типа ItemDto не передан(null)");
-            throw new NotFoundException("Вы не передали информацию о вещи!");
-        }
 
         Item addedItem = itemPagingAndSortingRepository
                 .findById(itemId)

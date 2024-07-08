@@ -20,8 +20,9 @@ import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemClient;
 import ru.practicum.shareit.item.controller.ItemController;
 import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.dto.ItemGetTestDto;
+import ru.practicum.shareit.item.dto.ItemPatchDto;
+import ru.practicum.shareit.item.dto.ItemPostDto;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -44,7 +45,7 @@ public class ItemControllerTest {
     private ItemClient itemClient;
     @Autowired
     private MockMvc mvc;
-    private ItemDto itemDto = new ItemDto(
+    private ItemPostDto itemDto = new ItemPostDto(
             1L, "name", "description", true, 1L, 1L, List.of());
     private ItemGetTestDto itemGetDto = new ItemGetTestDto(
             1L, "name", "description", true, 1L, 1L, null, null, List.of());
@@ -52,7 +53,7 @@ public class ItemControllerTest {
 
     @Test
     public void testPostItemOk() throws Exception {
-        when(itemClient.postItem(Mockito.anyLong(), Mockito.any(ItemDto.class)))
+        when(itemClient.postItem(Mockito.anyLong(), Mockito.any(ItemPostDto.class)))
                 .thenReturn(new ResponseEntity<>(itemDto, HttpStatus.OK));
 
         mvc.perform(post("/items")
@@ -73,7 +74,7 @@ public class ItemControllerTest {
 
     @Test
     public void testPostItemNotFoundException() throws Exception {
-        when(itemClient.postItem(Mockito.anyLong(), any(ItemDto.class)))
+        when(itemClient.postItem(Mockito.anyLong(), any(ItemPostDto.class)))
                 .thenThrow(NotFoundException.class);
 
         mvc.perform(post("/items")
@@ -89,7 +90,7 @@ public class ItemControllerTest {
 
     @Test
     public void testPostItemValidationException() throws Exception {
-        when(itemClient.postItem(Mockito.anyLong(), any(ItemDto.class)))
+        when(itemClient.postItem(Mockito.anyLong(), any(ItemPostDto.class)))
                 .thenThrow(ValidationException.class);
 
         mvc.perform(post("/items")
@@ -105,7 +106,7 @@ public class ItemControllerTest {
 
     @Test
     public void testPostItemBadRequestException() throws Exception {
-        when(itemClient.postItem(Mockito.anyLong(), any(ItemDto.class)))
+        when(itemClient.postItem(Mockito.anyLong(), any(ItemPostDto.class)))
                 .thenThrow(BadRequestException.class);
 
         mvc.perform(post("/items")
@@ -121,9 +122,9 @@ public class ItemControllerTest {
 
     @Test
     public void testPatchItemOk() throws Exception {
-        ItemDto itemDto1 = new ItemDto(1L, "name1", "description1", true, 1L, 1L, List.of());
+        ItemPatchDto itemDto1 = new ItemPatchDto("name1", "description1", true, 1L, 1L, List.of());
 
-        when(itemClient.patchItem(Mockito.anyLong(), Mockito.any(ItemDto.class), Mockito.anyLong()))
+        when(itemClient.patchItem(Mockito.anyLong(), Mockito.any(ItemPatchDto.class), Mockito.anyLong()))
                 .thenReturn(new ResponseEntity<>(itemDto1, HttpStatus.OK));
 
         mvc.perform(patch("/items/" + 1)
@@ -133,7 +134,6 @@ public class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(itemDto1.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(itemDto1.getName())))
                 .andExpect(jsonPath("$.description", is(itemDto1.getDescription())))
                 .andExpect(jsonPath("$.available", is(itemDto1.getAvailable())))
@@ -144,7 +144,7 @@ public class ItemControllerTest {
 
     @Test
     public void testPatchItemBadRequestException() throws Exception {
-        when(itemClient.patchItem(Mockito.anyLong(), any(ItemDto.class), Mockito.anyLong()))
+        when(itemClient.patchItem(Mockito.anyLong(), any(ItemPatchDto.class), Mockito.anyLong()))
                 .thenThrow(BadRequestException.class);
 
         mvc.perform(patch("/items/" + 1)
@@ -160,7 +160,7 @@ public class ItemControllerTest {
 
     @Test
     public void testPatchItemNotFoundException() throws Exception {
-        when(itemClient.patchItem(Mockito.anyLong(), any(ItemDto.class), Mockito.anyLong()))
+        when(itemClient.patchItem(Mockito.anyLong(), any(ItemPatchDto.class), Mockito.anyLong()))
                 .thenThrow(NotFoundException.class);
 
         mvc.perform(patch("/items/" + 1)
@@ -176,7 +176,7 @@ public class ItemControllerTest {
 
     @Test
     public void testPatchItemForbiddenException() throws Exception {
-        when(itemClient.patchItem(Mockito.anyLong(), any(ItemDto.class), Mockito.anyLong()))
+        when(itemClient.patchItem(Mockito.anyLong(), any(ItemPatchDto.class), Mockito.anyLong()))
                 .thenThrow(ForbiddenException.class);
 
         mvc.perform(patch("/items/" + 1)

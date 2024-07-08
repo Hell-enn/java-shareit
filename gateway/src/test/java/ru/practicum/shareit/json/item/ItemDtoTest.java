@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemPostDto;
 
 import java.util.List;
 
@@ -14,11 +14,11 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @JsonTest
 public class ItemDtoTest {
     @Autowired
-    private JacksonTester<ItemDto> json;
+    private JacksonTester<ItemPostDto> json;
 
     @Test
     public void testItemDtoSerialization() throws Exception {
-        ItemDto itemDto = new ItemDto(
+        ItemPostDto itemDto = new ItemPostDto(
                 1L,
                 "name",
                 "description",
@@ -27,7 +27,7 @@ public class ItemDtoTest {
                 1L,
                 List.of("comment1", "comment2", "comment3"));
 
-        JsonContent<ItemDto> result = json.write(itemDto);
+        JsonContent<ItemPostDto> result = json.write(itemDto);
 
         assertThat(json.write(itemDto)).hasJsonPathValue("$.description", "description");
 
@@ -51,7 +51,7 @@ public class ItemDtoTest {
                         "\"owner\":\"1\"," +
                         "\"requestId\":\"1\"," +
                         "\"comments\":[\"comment1\",\"comment2\",\"comment3\"]}";
-        ItemDto itemDto = new ItemDto(
+        ItemPostDto itemDto = new ItemPostDto(
                 1L,
                 "name",
                 "description",
@@ -65,7 +65,7 @@ public class ItemDtoTest {
 
     @Test
     public void testItemRequestInDtoWithoutRequester() throws Exception {
-        ItemDto itemDto = new ItemDto(
+        ItemPostDto itemDto = new ItemPostDto(
                 1L,
                 "",
                 "description",
@@ -74,7 +74,7 @@ public class ItemDtoTest {
                 1L,
                 List.of("comment1", "comment2", "comment3"));
 
-        JsonContent<ItemDto> result = json.write(itemDto);
+        JsonContent<ItemPostDto> result = json.write(itemDto);
         assertThat(result).extractingJsonPathStringValue("$.name").isEqualTo("");
     }
 }

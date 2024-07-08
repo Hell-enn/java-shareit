@@ -21,7 +21,6 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
       - SPRING_DATASOURCE_USERNAME=dbuser
       - SPRING_DATASOURCE_PASSWORD=12345
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
       - SERVER_PORT=9090
   db:
     image: postgres:13.7-alpine

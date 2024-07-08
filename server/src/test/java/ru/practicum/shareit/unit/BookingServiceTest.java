@@ -95,16 +95,6 @@ public class BookingServiceTest {
 
 
     @Test
-    public void testPostBookingNull() {
-        final BadRequestException exception = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> bookingService.postBooking(1L, null));
-
-        Assertions.assertEquals("Вы не передали информацию о бронировании!", exception.getMessage());
-    }
-
-
-    @Test
     public void testPostBookingWhenUserDoesNotExist() {
         LocalDateTime start = LocalDateTime.now().plusDays(1);
         LocalDateTime end = LocalDateTime.now().plusDays(2);
@@ -119,24 +109,6 @@ public class BookingServiceTest {
                 () -> bookingService.postBooking(1L, bookingDto));
 
         Assertions.assertEquals("Пользователь не найден!", exception.getMessage());
-    }
-
-
-    @Test
-    public void testPostBookingWhenItemIdNull() {
-        LocalDateTime start = LocalDateTime.now().plusDays(1);
-        LocalDateTime end = LocalDateTime.now().plusDays(2);
-        BookingDto bookingDto = new BookingDto(1L, start, end, null, 3L, BookingStatus.WAITING.getDescription());
-
-        Mockito
-                .when(mockUserJpaRepository.existsById(Mockito.anyLong()))
-                .thenReturn(true);
-
-        final ValidationException exception = Assertions.assertThrows(
-                ValidationException.class,
-                () -> bookingService.postBooking(1L, bookingDto));
-
-        Assertions.assertEquals("Ссылка на вещь отсутствует!", exception.getMessage());
     }
 
 

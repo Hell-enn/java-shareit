@@ -15,9 +15,10 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.request.RequestClient;
 import ru.practicum.shareit.request.controller.ItemRequestController;
-import ru.practicum.shareit.request.dto.ItemRequestInDto;
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.dto.ItemRequestOutTestDto;
+import ru.practicum.shareit.request.dto.ItemRequestPatchDto;
+import ru.practicum.shareit.request.dto.ItemRequestPostDto;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ public class ItemRequestControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    private ItemRequestInDto itemRequestInDto = new ItemRequestInDto(
+    private ItemRequestPostDto itemRequestInDto = new ItemRequestPostDto(
             1L, "description", 1L);
     private ItemRequestOutTestDto itemRequestOutDto = new ItemRequestOutTestDto(
             1L, "description", 1L, LocalDateTime.now(), List.of());
@@ -50,7 +51,7 @@ public class ItemRequestControllerTest {
 
     @Test
     public void testPostItemRequestOk() throws Exception {
-        when(requestClient.postItemRequest(Mockito.anyLong(), any(ItemRequestInDto.class)))
+        when(requestClient.postItemRequest(Mockito.anyLong(), any(ItemRequestPostDto.class)))
                 .thenReturn(new ResponseEntity<>(itemRequestOutDto, HttpStatus.OK));
 
         mvc.perform(post("/requests")
@@ -68,7 +69,7 @@ public class ItemRequestControllerTest {
 
     @Test
     public void testPostItemRequestNotFoundException() throws Exception {
-        when(requestClient.postItemRequest(Mockito.anyLong(), any(ItemRequestInDto.class)))
+        when(requestClient.postItemRequest(Mockito.anyLong(), any(ItemRequestPostDto.class)))
                 .thenThrow(NotFoundException.class);
 
         mvc.perform(post("/requests")
@@ -84,7 +85,7 @@ public class ItemRequestControllerTest {
 
     @Test
     public void testPostItemRequestValidationException() throws Exception {
-        when(requestClient.postItemRequest(Mockito.anyLong(), any(ItemRequestInDto.class)))
+        when(requestClient.postItemRequest(Mockito.anyLong(), any(ItemRequestPostDto.class)))
                 .thenThrow(ValidationException.class);
 
         mvc.perform(post("/requests")
@@ -100,7 +101,7 @@ public class ItemRequestControllerTest {
 
     @Test
     public void testPostItemRequestBadRequestException() throws Exception {
-        when(requestClient.postItemRequest(Mockito.anyLong(), any(ItemRequestInDto.class)))
+        when(requestClient.postItemRequest(Mockito.anyLong(), any(ItemRequestPostDto.class)))
                 .thenThrow(BadRequestException.class);
 
         mvc.perform(post("/requests")
@@ -118,12 +119,12 @@ public class ItemRequestControllerTest {
     public void testPatchItemRequestOk() throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
-        ItemRequestInDto itemRequestInDto1 = new ItemRequestInDto(
+        ItemRequestPatchDto itemRequestInDto1 = new ItemRequestPatchDto(
                 1L, "new description", 2L);
         ItemRequestOutTestDto itemRequestOutDto1 = new ItemRequestOutTestDto(
                 1L, "new description", 1L, now, List.of());
 
-        when(requestClient.patchItemRequest(Mockito.anyLong(), any(ItemRequestInDto.class), Mockito.anyLong()))
+        when(requestClient.patchItemRequest(Mockito.anyLong(), any(ItemRequestPatchDto.class), Mockito.anyLong()))
                 .thenReturn(new ResponseEntity<>(itemRequestOutDto1, HttpStatus.OK));
 
         mvc.perform(patch("/requests/1")
@@ -142,7 +143,7 @@ public class ItemRequestControllerTest {
     @Test
     public void testPatchItemRequestValidationException() throws Exception {
 
-        when(requestClient.patchItemRequest(Mockito.anyLong(), any(ItemRequestInDto.class), Mockito.anyLong()))
+        when(requestClient.patchItemRequest(Mockito.anyLong(), any(ItemRequestPatchDto.class), Mockito.anyLong()))
                 .thenThrow(ValidationException.class);
 
         mvc.perform(patch("/requests/" + 1)
@@ -159,7 +160,7 @@ public class ItemRequestControllerTest {
     @Test
     public void testPatchItemRequestNotFoundException() throws Exception {
 
-        when(requestClient.patchItemRequest(Mockito.anyLong(), any(ItemRequestInDto.class), Mockito.anyLong()))
+        when(requestClient.patchItemRequest(Mockito.anyLong(), any(ItemRequestPatchDto.class), Mockito.anyLong()))
                 .thenThrow(NotFoundException.class);
 
         mvc.perform(patch("/requests/" + 1)
@@ -176,7 +177,7 @@ public class ItemRequestControllerTest {
     @Test
     public void testPatchItemRequestBadRequestException() throws Exception {
 
-        when(requestClient.patchItemRequest(Mockito.anyLong(), any(ItemRequestInDto.class), Mockito.anyLong()))
+        when(requestClient.patchItemRequest(Mockito.anyLong(), any(ItemRequestPatchDto.class), Mockito.anyLong()))
                 .thenThrow(BadRequestException.class);
 
         mvc.perform(patch("/requests/" + 1)

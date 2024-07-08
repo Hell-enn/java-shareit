@@ -7,7 +7,6 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -32,7 +31,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto postUser(UserDto userDto) {
-        validateNewUser(userDto);
         User user = userMapper.toUser(userDto);
         User addedUser;
         try {
@@ -47,7 +45,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto patchUser(Long userId, UserDto userDto) {
-        User addedUser = validateUpdateUser(userId, userDto);
+        User addedUser = userJpaRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new NotFoundException("Пользователь с таким id не найден!"));
         userMapper.updateUserFromDto(userDto, addedUser);
         userJpaRepository.save(addedUser);
         log.debug("Пользователь \"{}\" обновлён!", addedUser.getName());
@@ -81,50 +81,5 @@ public class UserServiceImpl implements UserService {
                () -> new NotFoundException("Пользователь не найден!"));
        log.debug("Возвращаем пользователя с id={}", userId);
         return userMapper.toUserDto(addedUserOpt);
-    }
-
-
-    /**
-     * Закрытый служебный метод проверяет объект типа User
-     * на соответствие ряду условий. Используется впоследствии
-     * для валидации объекта типа UserDto при попытке его добавления
-     * в хранилище.
-     * В случае неудачи выбрасывает исключение с сообщением об ошибке.
-     *
-     * @param userDto (объект пользователя)
-     */
-    private void validateNewUser(UserDto userDto) {
-
-        String message = "";
-
-        if (userDto == null)
-            message = "Вы не передали информацию о пользователе!";
-        else if (userDto.getEmail() == null)
-            message = "Вы не передали информацию об электронной почте пользователя!";
-        if (!message.isBlank()) {
-            log.debug(message);
-            throw new ValidationException(message);
-        }
-    }
-
-
-    /**
-     * Закрытый служебный метод проверяет объект типа User
-     * на соответствие ряду условий. Используется впоследствии
-     * для валидации объекта типа UserDto при попытке обновления хранимого
-     * в репозитории объекта.
-     * В случае неудачи выбрасывает исключение с сообщением об ошибке.
-     *
-     * @param userId (идентификатор пользователя)
-     * @param userDto (объект пользователя)
-     */
-    private User validateUpdateUser(Long userId, UserDto userDto) {
-        if (userDto == null) {
-            log.debug("Объект типа UserDto отсутствует(null) при запросе на добавление пользователя");
-            throw new ValidationException("Вы не передали информацию о пользователе!");
-        }
-        return userJpaRepository
-                .findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с таким id не найден!"));
     }
 }

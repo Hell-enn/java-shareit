@@ -51,20 +51,6 @@ public class UserServiceTest {
 
 
     @Test
-    public void testPostUserNull() {
-        Mockito
-                .when(mockUserJpaRepository.save(Mockito.any(User.class)))
-                .thenThrow(new ValidationException("Вы не передали информацию о пользователе!"));
-
-        final ValidationException exception = Assertions.assertThrows(
-                ValidationException.class,
-                () -> userService.postUser(null));
-
-        Assertions.assertEquals("Вы не передали информацию о пользователе!", exception.getMessage());
-    }
-
-
-    @Test
     public void testPostUserWithoutEmail() {
         Mockito
                 .when(mockUserJpaRepository.save(Mockito.any(User.class)))
@@ -125,20 +111,6 @@ public class UserServiceTest {
         UserDto userDto = new UserDto(1L, "Ivan Ivanov", "ivanivanov1@gmail.com");
         UserDto addedUserDto = userService.patchUser(1L, userDto);
         Assertions.assertEquals(userDto, addedUserDto);
-    }
-
-
-    @Test
-    public void testPatchUserNull() {
-        Mockito
-                .when(mockUserJpaRepository.save(Mockito.any(User.class)))
-                .thenThrow(new ValidationException("Вы не передали информацию об электронной почте пользователя!"));
-
-        final ValidationException exception = Assertions.assertThrows(
-                ValidationException.class,
-                () -> userService.patchUser(1L, null));
-
-        Assertions.assertEquals("Вы не передали информацию о пользователе!", exception.getMessage());
     }
 
 
