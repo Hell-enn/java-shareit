@@ -12,7 +12,6 @@ import org.mockito.quality.Strictness;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.request.dto.ItemRequestInDto;
 import ru.practicum.shareit.request.dto.ItemRequestOutDto;
 import ru.practicum.shareit.request.mapper.ItemRequestMapper;
